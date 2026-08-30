@@ -1,0 +1,768 @@
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:4:import com.amcs.application.dto.security.ChangePasswordCommand;
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:8:import com.amcs.application.exception.InvalidPasswordException;
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:9:import com.amcs.application.exception.PasswordValidationException;
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:21:import org.springframework.security.crypto.password.PasswordEncoder;
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:41:    private PasswordEncoder passwordEncoder;
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:42:    private PasswordValidator passwordValidator;
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:48:    private final String rawPassword = "ValidPassword123!";
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:49:    private String encodedPassword;
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:54:        passwordEncoder = new SecurityCryptoConfig().passwordEncoder(4);
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:55:        passwordValidator = new PasswordValidator(8, 128, true, true, true, true);
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:56:        encodedPassword = passwordEncoder.encode(rawPassword);
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:60:            passwordEncoder,
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:61:            passwordValidator,
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:79:            encodedPassword,
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:98:        AuthenticationResult result = service.authenticate(new LoginCommand("user123", rawPassword));
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:113:        AuthenticationResult result = service.authenticate(new LoginCommand("user@univ.edu", rawPassword));
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:127:            .hasMessage("Invalid username or password")
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:133:    @DisplayName("4 & 5. Invalid password increments failed attempt counter")
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:134:    void shouldIncrementFailedAttemptsOnWrongPassword() {
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:140:            .hasMessage("Invalid username or password")
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:168:        assertThatThrownBy(() -> service.authenticate(new LoginCommand("user123", rawPassword)))
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:183:        AuthenticationResult result = service.authenticate(new LoginCommand("user123", rawPassword));
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:195:        assertThatThrownBy(() -> service.authenticate(new LoginCommand("user123", rawPassword)))
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:208:        assertThatThrownBy(() -> service.authenticate(new LoginCommand("user123", rawPassword)))
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:221:        AuthenticationResult result = service.authenticate(new LoginCommand("admin", rawPassword));
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:229:    @DisplayName("16. Password is never returned in authentication result")
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:230:    void shouldNotExposePasswordInResult() {
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:234:        AuthenticationResult result = service.authenticate(new LoginCommand("user123", rawPassword));
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:236:        // AuthenticationResult record does not even declare a password field
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:237:        assertThat(result.toString()).doesNotContain(rawPassword);
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:238:        assertThat(result.toString()).doesNotContain(encodedPassword);
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:242:    @DisplayName("17 & 21. Correct current password allows change and increments token_version")
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:243:    void shouldChangePasswordSuccessfully() {
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:247:        String newPassword = "NewSecretPassword456!";
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:248:        service.changePassword(new ChangePasswordCommand(userId, rawPassword, newPassword));
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:250:        verify(userAccountRepositoryPort).updatePassword(eq(userId), any(String.class));
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:251:        verify(userAccountRepositoryPort).incrementTokenVersion(userId);
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:255:    @DisplayName("18. Incorrect current password rejects password change")
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:256:    void shouldRejectPasswordChangeWithWrongCurrentPassword() {
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:260:        assertThatThrownBy(() -> service.changePassword(new ChangePasswordCommand(userId, "WrongCurrentPass123!", "NewSecretPassword456!")))
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:261:            .isInstanceOf(InvalidPasswordException.class)
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:262:            .hasMessage("Current password does not match");
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:264:        verify(userAccountRepositoryPort, never()).updatePassword(any(), any());
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:265:        verify(userAccountRepositoryPort, never()).incrementTokenVersion(any());
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:269:    @DisplayName("19. Password policy rejects simple passwords without uppercase/digit/symbol")
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:270:    void shouldRejectWeakNewPassword() {
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:274:        assertThatThrownBy(() -> service.changePassword(new ChangePasswordCommand(userId, rawPassword, "weakpass")))
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:275:            .isInstanceOf(PasswordValidationException.class);
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:277:        verify(userAccountRepositoryPort, never()).updatePassword(any(), any());
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:281:    @DisplayName("20. New password identical to current password is rejected")
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:282:    void shouldRejectIdenticalNewPassword() {
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:286:        assertThatThrownBy(() -> service.changePassword(new ChangePasswordCommand(userId, rawPassword, rawPassword)))
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:287:            .isInstanceOf(PasswordValidationException.class)
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:288:            .hasMessage("New password must be different from current password");
+src/test/java/com/amcs/application/service/AuthenticationApplicationServiceTest.java:290:        verify(userAccountRepositoryPort, never()).updatePassword(any(), any());
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:11:    private final String validCustomSecret = "my-custom-production-secret-key-that-is-at-least-32-bytes-long!";
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:14:    @DisplayName("In dev or default profile, development fallback secret is accepted")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:15:    void devProfileAllowsFallbackSecret() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:17:            JwtProperties.DEV_FALLBACK_SECRET,
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:22:        assertThat(properties.getSecret()).isEqualTo(JwtProperties.DEV_FALLBACK_SECRET);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:26:    @DisplayName("In prod profile, development fallback secret throws IllegalStateException (F-03)")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:27:    void prodProfileRejectsFallbackSecret() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:29:            JwtProperties.DEV_FALLBACK_SECRET,
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:35:        .hasMessageContaining("Production environment MUST explicitly configure AMCS_JWT_SECRET");
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:39:    @DisplayName("In production profile, development fallback secret throws IllegalStateException")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:40:    void productionProfileRejectsFallbackSecret() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:42:            JwtProperties.DEV_FALLBACK_SECRET,
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:48:        .hasMessageContaining("Production environment MUST explicitly configure AMCS_JWT_SECRET");
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:52:    @DisplayName("In prod profile with explicit custom secret, configuration succeeds")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:53:    void prodProfileWithCustomSecretSucceeds() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:55:            validCustomSecret,
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:60:        assertThat(properties.getSecret()).isEqualTo(validCustomSecret);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:64:    @DisplayName("Secret shorter than 32 bytes throws IllegalArgumentException")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtPropertiesTest.java:65:    void shortSecretThrowsException() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:6:import io.jsonwebtoken.Jwts;
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:7:import io.jsonwebtoken.security.Keys;
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:12:import javax.crypto.SecretKey;
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:25:class JwtTokenProviderTest {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:27:    private static final String TEST_SECRET = "super-secret-key-that-is-at-least-256-bits-long-32-bytes!";
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:28:    private static final String ANOTHER_SECRET = "another-super-secret-key-that-is-at-least-256-bits-long!";
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:35:    private JwtTokenProvider provider;
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:45:        properties = new JwtProperties(TEST_SECRET, ISSUER, EXPIRATION_SECONDS);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:46:        provider = new JwtTokenProvider(properties, fixedClock);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:79:    void shouldGenerateValidTokenWithAllClaims() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:82:        String token = provider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:84:        assertThat(token).isNotBlank();
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:85:        assertThat(provider.isValid(token)).isTrue();
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:87:        ValidatedTokenClaims claims = provider.parseAndValidate(token);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:94:        assertThat(claims.tokenVersion()).isEqualTo(1);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:101:    void shouldGenerateValidFacultyToken() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:104:        String token = provider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:105:        ValidatedTokenClaims claims = provider.parseAndValidate(token);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:110:        assertThat(claims.tokenVersion()).isEqualTo(2);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:116:        String token = provider.generateToken(createStudentAuth());
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:117:        ValidatedTokenClaims claims = provider.parseAndValidate(token);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:128:    @DisplayName("13. Accepts Bearer prefixed token as well as raw token")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:129:    void shouldAcceptBearerPrefixedToken() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:130:        String token = provider.generateToken(createStudentAuth());
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:131:        ValidatedTokenClaims claims = provider.parseAndValidate("Bearer " + token);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:137:    @DisplayName("14. Expired token is rejected with EXPIRED error code")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:138:    void shouldRejectExpiredToken() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:139:        String token = provider.generateToken(createStudentAuth());
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:143:        JwtTokenProvider expiredVerifier = new JwtTokenProvider(properties, fastForwardClock);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:145:        assertThatThrownBy(() -> expiredVerifier.parseAndValidate(token))
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:154:        String token = provider.generateToken(createStudentAuth());
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:155:        String tampered = token.substring(0, token.length() - 5) + "abcde";
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:164:    @DisplayName("16. Token signed with another secret is rejected")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:165:    void shouldRejectTokenSignedWithDifferentSecret() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:166:        JwtProperties otherProps = new JwtProperties(ANOTHER_SECRET, ISSUER, EXPIRATION_SECONDS);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:167:        JwtTokenProvider otherProvider = new JwtTokenProvider(otherProps, fixedClock);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:169:        String foreignToken = otherProvider.generateToken(createStudentAuth());
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:171:        assertThatThrownBy(() -> provider.parseAndValidate(foreignToken))
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:180:        JwtProperties foreignIssuerProps = new JwtProperties(TEST_SECRET, "rogue-issuer", EXPIRATION_SECONDS);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:181:        JwtTokenProvider foreignIssuerProvider = new JwtTokenProvider(foreignIssuerProps, fixedClock);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:183:        String rogueToken = foreignIssuerProvider.generateToken(createStudentAuth());
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:185:        assertThatThrownBy(() -> provider.parseAndValidate(rogueToken))
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:192:    @DisplayName("18. Malformed token is rejected with MALFORMED")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:193:    void shouldRejectMalformedToken() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:194:        assertThatThrownBy(() -> provider.parseAndValidate("not.a.valid.jwt.token"))
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:201:    @DisplayName("19. Empty or blank token is rejected with INVALID_FORMAT")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:202:    void shouldRejectEmptyToken() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:222:        SecretKey key = Keys.hmacShaKeyFor(TEST_SECRET.getBytes(StandardCharsets.UTF_8));
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:223:        String nonUuidToken = Jwts.builder()
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:229:            .claim("tokenVersion", 1)
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:235:        assertThatThrownBy(() -> provider.parseAndValidate(nonUuidToken))
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:244:        SecretKey key = Keys.hmacShaKeyFor(TEST_SECRET.getBytes(StandardCharsets.UTF_8));
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:245:        String invalidRoleToken = Jwts.builder()
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:251:            .claim("tokenVersion", 1)
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:257:        assertThatThrownBy(() -> provider.parseAndValidate(invalidRoleToken))
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:266:        SecretKey key = Keys.hmacShaKeyFor(TEST_SECRET.getBytes(StandardCharsets.UTF_8));
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:267:        String badStudentToken = Jwts.builder()
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:274:            .claim("tokenVersion", 1)
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:280:        assertThatThrownBy(() -> provider.parseAndValidate(badStudentToken))
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:287:    @DisplayName("25. Missing required claim (tokenVersion) is rejected")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:289:        SecretKey key = Keys.hmacShaKeyFor(TEST_SECRET.getBytes(StandardCharsets.UTF_8));
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:290:        String missingClaimToken = Jwts.builder()
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:296:            // missing tokenVersion
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:302:        assertThatThrownBy(() -> provider.parseAndValidate(missingClaimToken))
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:309:    // TOKEN VERSION TESTS
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:313:    @DisplayName("27 & 28. Token version is correctly extracted and preserved")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:314:    void shouldExtractAndPreserveTokenVersion() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:318:        String token = provider.generateToken(v5Auth);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:320:        assertThat(provider.extractTokenVersion(token)).isEqualTo(5);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:328:    @DisplayName("29-31. Password and secret are never present in claims")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:329:    void shouldNeverContainPasswordsOrSecretInClaims() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:330:        String token = provider.generateToken(createStudentAuth());
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:332:        assertThat(token).doesNotContain("password");
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:333:        assertThat(token).doesNotContain(TEST_SECRET);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:337:    @DisplayName("32 & 33. Weak secret (< 32 bytes / 256 bits) is rejected during initialization")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:338:    void shouldRejectWeakSecret() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:339:        assertThatThrownBy(() -> new JwtProperties("too-short-secret", ISSUER, 3600L))
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:345:    @DisplayName("34. Missing secret is rejected safely")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:346:    void shouldRejectBlankSecret() {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:355:        JwtProperties customProps = new JwtProperties(TEST_SECRET, "custom-issuer", 7200L);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:356:        JwtTokenProvider customProvider = new JwtTokenProvider(customProps, fixedClock);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:358:        String token = customProvider.generateToken(createStudentAuth());
+src/test/java/com/amcs/infrastructure/security/jwt/JwtTokenProviderTest.java:359:        ValidatedTokenClaims claims = customProvider.parseAndValidate(token);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:40:    private static final String TEST_SECRET = "super-secret-key-that-is-at-least-256-bits-long-32-bytes!";
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:49:    private JwtTokenProvider tokenProvider;
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:62:        JwtProperties properties = new JwtProperties(TEST_SECRET, ISSUER, 3600L);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:63:        tokenProvider = new JwtTokenProvider(properties, fixedClock);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:65:        filter = new JwtAuthenticationFilter(tokenProvider, userAccountRepositoryPort, entryPoint);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:73:    private UserAccount createActiveAccount(UserRole role, int tokenVersion) {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:85:            tokenVersion,
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:93:    void shouldAuthenticateValidStudentToken() throws ServletException, IOException {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:97:        String token = tokenProvider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:103:        request.addHeader("Authorization", "Bearer " + token);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:126:    void shouldAuthenticateValidFacultyToken() throws ServletException, IOException {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:130:        String token = tokenProvider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:136:        request.addHeader("Authorization", "Bearer " + token);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:161:    @DisplayName("4. Malformed JWT returns 401 MALFORMED_TOKEN")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:162:    void shouldReturn401OnMalformedToken() throws ServletException, IOException {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:171:        assertThat(response.getContentAsString()).contains("MALFORMED_TOKEN");
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:177:    @DisplayName("5. Expired JWT returns 401 TOKEN_EXPIRED")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:178:    void shouldReturn401OnExpiredToken() throws ServletException, IOException {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:179:        // Create token with past clock
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:181:        JwtProperties props = new JwtProperties(TEST_SECRET, ISSUER, 3600L);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:182:        JwtTokenProvider pastProvider = new JwtTokenProvider(props, pastClock);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:187:        String expiredToken = pastProvider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:190:        request.addHeader("Authorization", "Bearer " + expiredToken);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:197:        assertThat(response.getContentAsString()).contains("TOKEN_EXPIRED");
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:203:    @DisplayName("6. Tampered JWT signature returns 401 INVALID_TOKEN")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:204:    void shouldReturn401OnTamperedToken() throws ServletException, IOException {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:208:        String validToken = tokenProvider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:209:        String tamperedToken = validToken.substring(0, validToken.length() - 6) + "xxxxxx";
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:212:        request.addHeader("Authorization", "Bearer " + tamperedToken);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:219:        assertThat(response.getContentAsString()).contains("INVALID_TOKEN");
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:224:    @DisplayName("7. Token version mismatch (revoked token) returns 401 TOKEN_EXPIRED")
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:225:    void shouldRejectTokenVersionMismatch() throws ServletException, IOException {
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:226:        // Token was issued with version 1
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:230:        String token = tokenProvider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:232:        // Account was updated (e.g. password changed) so DB has version 2
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:237:        request.addHeader("Authorization", "Bearer " + token);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:244:        assertThat(response.getContentAsString()).contains("TOKEN_EXPIRED");
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:255:        String token = tokenProvider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilterTest.java:264:        request.addHeader("Authorization", "Bearer " + token);
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:47:import com.amcs.infrastructure.security.jwt.JwtTokenProvider;
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:99:    private JwtTokenProvider jwtTokenProvider;
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:106:    private final String rawSecret = "super-secret-test-key-must-be-at-least-256-bits-long-32-bytes!";
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:120:        JwtProperties jwtProperties = new JwtProperties(rawSecret, "amcs-auth-service", 3600);
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:121:        jwtTokenProvider = new JwtTokenProvider(jwtProperties, Clock.systemUTC());
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:143:            jwtTokenProvider,
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:174:    private String createToken(UUID userId, String username, UserRole role, Optional<UUID> sId, Optional<UUID> fId) {
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:175:        return jwtTokenProvider.generateToken(new AuthenticationResult(
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:197:            String token = createToken(userStudentId, "student", UserRole.STUDENT, Optional.of(studentId), Optional.empty());
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:203:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:215:            String token = createToken(userFacultyId, "faculty", UserRole.FACULTY, Optional.empty(), Optional.of(facultyId));
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:221:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:232:            String token = createToken(userAdminId, "admin", UserRole.HOD_ADMIN, Optional.empty(), Optional.empty());
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:241:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:252:            String token = createToken(userStudentId, "student", UserRole.STUDENT, Optional.of(studentId), Optional.empty());
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:260:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:270:            String token = createToken(userStudentId, "student", UserRole.STUDENT, Optional.of(studentId), Optional.empty());
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:276:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:286:            String token = createToken(userStudentId, "student", UserRole.STUDENT, Optional.of(studentId), Optional.empty());
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:292:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:310:            String token = createToken(userStudentId, "student", UserRole.STUDENT, Optional.of(studentId), Optional.empty());
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:316:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:327:            String token = createToken(userFacultyId, "faculty", UserRole.FACULTY, Optional.empty(), Optional.of(facultyId));
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:333:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:343:            String token = createToken(userAdminId, "admin", UserRole.HOD_ADMIN, Optional.empty(), Optional.empty());
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:353:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:372:            String token = createToken(userStudentId, "student", UserRole.STUDENT, Optional.of(studentId), Optional.empty());
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:378:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:389:            String token = createToken(userFacultyId, "faculty", UserRole.FACULTY, Optional.empty(), Optional.of(facultyId));
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:395:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:406:            String token = createToken(userAdminId, "admin", UserRole.HOD_ADMIN, Optional.empty(), Optional.empty());
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:415:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:434:            String token = createToken(userStudentId, "student", UserRole.STUDENT, Optional.of(studentId), Optional.empty());
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:447:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:458:            String token = createToken(userFacultyId, "faculty", UserRole.FACULTY, Optional.empty(), Optional.of(facultyId));
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:470:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:481:            String token = createToken(userAdminId, "admin", UserRole.HOD_ADMIN, Optional.empty(), Optional.empty());
+src/test/java/com/amcs/infrastructure/security/rbac/AdministrativeRbacIntegrationTest.java:500:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:48:import com.amcs.infrastructure.security.jwt.JwtTokenProvider;
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:92:    private static final String TEST_SECRET = "super-secret-key-that-is-at-least-256-bits-long-32-bytes!";
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:116:    private JwtTokenProvider tokenProvider;
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:152:        jwtProperties = new JwtProperties(TEST_SECRET, ISSUER, 3600L);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:153:        tokenProvider = new JwtTokenProvider(jwtProperties, Clock.systemUTC());
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:156:        JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(tokenProvider, userAccountRepositoryPort, entryPoint);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:200:    private String createToken(UUID userId, String username, UserRole role, Optional<UUID> studentId, Optional<UUID> facultyId, int version) {
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:202:        return tokenProvider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:223:            String token = createToken(userStudentAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:227:                    .header("Authorization", "Bearer " + token))
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:237:            String token = createToken(userStudentAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:243:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:256:            String token = createToken(userStudentAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:260:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:280:            String token = createToken(userFacultyAId, "facultyA", UserRole.FACULTY, Optional.empty(), Optional.of(facultyAId), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:291:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:303:            String token = createToken(userFacultyCId, "facultyC", UserRole.FACULTY, Optional.empty(), Optional.of(facultyCId), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:316:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:328:            String token = createToken(userFacultyBId, "facultyB", UserRole.FACULTY, Optional.empty(), Optional.of(facultyBId), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:342:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:362:            String token = createToken(userFacultyAId, "facultyA", UserRole.FACULTY, Optional.empty(), Optional.of(facultyAId), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:370:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:390:            String token = createToken(userStudentAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:398:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:410:            String token = createToken(userStudentAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:418:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:430:            String token = createToken(userFacultyAId, "facultyA", UserRole.FACULTY, Optional.empty(), Optional.of(facultyAId), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:438:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:458:            String token = createToken(userAdminId, "admin", UserRole.HOD_ADMIN, Optional.empty(), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:464:                    .header("Authorization", "Bearer " + token))
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:472:            String token = createToken(userAdminId, "admin", UserRole.HOD_ADMIN, Optional.empty(), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:485:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:504:            String token = createToken(userStudentAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:512:            // Malicious JSON containing injected role, status, tokenVersion
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:519:                    "tokenVersion": 999
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:524:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:545:            String token = createToken(userStudentAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:553:                    .header("Authorization", "Bearer " + token))
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:561:            String token = createToken(userStudentAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:565:                    .header("Authorization", "Bearer " + token))
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:573:            String token = createToken(userFacultyAId, "facultyA", UserRole.FACULTY, Optional.empty(), Optional.of(facultyAId), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:584:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:593:            String token = createToken(userFacultyAId, "facultyA", UserRole.FACULTY, Optional.empty(), Optional.of(facultyAId), 1);
+src/test/java/com/amcs/infrastructure/security/rbac/ComprehensiveSecurityAndRbacTest.java:605:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:6:import org.springframework.security.crypto.password.PasswordEncoder;
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:10:class PasswordEncoderTest {
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:12:    private PasswordEncoder passwordEncoder;
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:17:        passwordEncoder = config.passwordEncoder(12);
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:21:    @DisplayName("Same plaintext password produces different salt hashes when encoded independently")
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:22:    void shouldProduceDifferentHashesForSamePassword() {
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:23:        String password = "StrongSecretPassword123!";
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:24:        String hash1 = passwordEncoder.encode(password);
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:25:        String hash2 = passwordEncoder.encode(password);
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:33:    @DisplayName("matches() accepts the correct plaintext password")
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:34:    void shouldMatchCorrectPassword() {
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:35:        String password = "CorrectPassword123!";
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:36:        String hash = passwordEncoder.encode(password);
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:38:        assertThat(passwordEncoder.matches(password, hash)).isTrue();
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:42:    @DisplayName("matches() rejects an incorrect plaintext password")
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:43:    void shouldRejectIncorrectPassword() {
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:44:        String password = "CorrectPassword123!";
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:45:        String hash = passwordEncoder.encode(password);
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:47:        assertThat(passwordEncoder.matches("WrongPassword123!", hash)).isFalse();
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:53:        String password = "AnyArbitraryPasswordLength123!";
+src/test/java/com/amcs/infrastructure/security/config/PasswordEncoderTest.java:54:        String hash = passwordEncoder.encode(password);
+src/test/java/com/amcs/infrastructure/security/config/SecurityFilterChainIntegrationTest.java:13:import com.amcs.infrastructure.security.jwt.JwtTokenProvider;
+src/test/java/com/amcs/infrastructure/security/config/SecurityFilterChainIntegrationTest.java:43:    private static final String TEST_SECRET = "super-secret-key-that-is-at-least-256-bits-long-32-bytes!";
+src/test/java/com/amcs/infrastructure/security/config/SecurityFilterChainIntegrationTest.java:53:    private JwtTokenProvider tokenProvider;
+src/test/java/com/amcs/infrastructure/security/config/SecurityFilterChainIntegrationTest.java:60:        JwtProperties jwtProperties = new JwtProperties(TEST_SECRET, ISSUER, 3600L);
+src/test/java/com/amcs/infrastructure/security/config/SecurityFilterChainIntegrationTest.java:61:        tokenProvider = new JwtTokenProvider(jwtProperties, Clock.systemUTC());
+src/test/java/com/amcs/infrastructure/security/config/SecurityFilterChainIntegrationTest.java:67:            tokenProvider,
+src/test/java/com/amcs/infrastructure/security/config/SecurityFilterChainIntegrationTest.java:95:    @DisplayName("Request with invalid JWT returns 401 MALFORMED_TOKEN in ApiErrorResponse")
+src/test/java/com/amcs/infrastructure/security/config/SecurityFilterChainIntegrationTest.java:96:    void shouldReturn401WhenInvalidToken() throws Exception {
+src/test/java/com/amcs/infrastructure/security/config/SecurityFilterChainIntegrationTest.java:98:                .header("Authorization", "Bearer invalid.token.structure")
+src/test/java/com/amcs/infrastructure/security/config/SecurityFilterChainIntegrationTest.java:102:            .andExpect(jsonPath("$.code").value("MALFORMED_TOKEN"))
+src/test/java/com/amcs/infrastructure/security/config/SecurityFilterChainIntegrationTest.java:108:    void shouldDispatchToControllerWhenValidToken() throws Exception {
+src/test/java/com/amcs/infrastructure/security/config/SecurityFilterChainIntegrationTest.java:112:        String token = tokenProvider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/config/SecurityFilterChainIntegrationTest.java:124:                .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/adapter/CurrentUserIntegrationTest.java:13:import com.amcs.infrastructure.security.jwt.JwtTokenProvider;
+src/test/java/com/amcs/infrastructure/security/adapter/CurrentUserIntegrationTest.java:45:    private static final String TEST_SECRET = "super-secret-key-that-is-at-least-256-bits-long-32-bytes!";
+src/test/java/com/amcs/infrastructure/security/adapter/CurrentUserIntegrationTest.java:52:    private JwtTokenProvider tokenProvider;
+src/test/java/com/amcs/infrastructure/security/adapter/CurrentUserIntegrationTest.java:87:        JwtProperties jwtProperties = new JwtProperties(TEST_SECRET, ISSUER, 3600L);
+src/test/java/com/amcs/infrastructure/security/adapter/CurrentUserIntegrationTest.java:88:        tokenProvider = new JwtTokenProvider(jwtProperties, Clock.systemUTC());
+src/test/java/com/amcs/infrastructure/security/adapter/CurrentUserIntegrationTest.java:92:            tokenProvider,
+src/test/java/com/amcs/infrastructure/security/adapter/CurrentUserIntegrationTest.java:117:        String token = tokenProvider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/adapter/CurrentUserIntegrationTest.java:127:                .header("Authorization", "Bearer " + token))
+src/test/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapterTest.java:11:import org.springframework.security.authentication.AnonymousAuthenticationToken;
+src/test/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapterTest.java:12:import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+src/test/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapterTest.java:48:        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+src/test/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapterTest.java:72:        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+src/test/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapterTest.java:89:        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+src/test/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapterTest.java:110:    @DisplayName("7. AnonymousAuthenticationToken is treated as unauthenticated")
+src/test/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapterTest.java:111:    void shouldHandleAnonymousToken() {
+src/test/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapterTest.java:112:        AnonymousAuthenticationToken anonymousToken = new AnonymousAuthenticationToken(
+src/test/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapterTest.java:115:        SecurityContextHolder.getContext().setAuthentication(anonymousToken);
+src/test/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapterTest.java:125:        UsernamePasswordAuthenticationToken rawAuth = new UsernamePasswordAuthenticationToken(
+src/test/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapterTest.java:136:    @DisplayName("9. No password, hash, or token is exposed in AuthenticatedActor")
+src/test/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapterTest.java:142:            new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities())
+src/test/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapterTest.java:148:        assertThat(actor.toString()).doesNotContain("password");
+src/test/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapterTest.java:150:        assertThat(actor.toString()).doesNotContain("token");
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:46:import com.amcs.infrastructure.security.jwt.JwtTokenProvider;
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:87:    private static final String TEST_SECRET = "super-secret-key-that-is-at-least-256-bits-long-32-bytes!";
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:88:    private static final String WRONG_SECRET = "completely-wrong-secret-key-that-is-also-at-least-32-bytes!!";
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:111:    private JwtTokenProvider tokenProvider;
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:137:        jwtProperties = new JwtProperties(TEST_SECRET, ISSUER, 3600L);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:138:        tokenProvider = new JwtTokenProvider(jwtProperties, Clock.systemUTC());
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:141:        JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(tokenProvider, userAccountRepositoryPort, entryPoint);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:179:    private String createToken(UUID userId, String username, UserRole role, Optional<UUID> studentId, Optional<UUID> facultyId, int version) {
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:181:        return tokenProvider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:198:        @DisplayName("1. Malformed Bearer token returns 401 MALFORMED_TOKEN in ApiErrorResponse")
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:199:        void shouldReturn401OnMalformedBearerToken() throws Exception {
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:201:                    .header("Authorization", "Bearer not.a.valid.jwt.token"))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:205:                .andExpect(jsonPath("$.code").value("MALFORMED_TOKEN"))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:206:                .andExpect(jsonPath("$.message").value("JWT token structure is malformed"))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:213:        @DisplayName("2. Expired JWT returns 401 TOKEN_EXPIRED")
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:214:        void shouldReturn401OnExpiredToken() throws Exception {
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:216:            JwtTokenProvider pastProvider = new JwtTokenProvider(jwtProperties, pastClock);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:218:            String expiredToken = pastProvider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:221:                    .header("Authorization", "Bearer " + expiredToken))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:224:                .andExpect(jsonPath("$.code").value("TOKEN_EXPIRED"))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:225:                .andExpect(jsonPath("$.message").value("JWT token has expired"))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:230:        @DisplayName("3. Tampered JWT signature returns 401 INVALID_TOKEN")
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:231:        void shouldReturn401OnTamperedToken() throws Exception {
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:232:            String validToken = createToken(userAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:233:            String tamperedToken = validToken.substring(0, validToken.length() - 8) + "xxxxxxxx";
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:236:                    .header("Authorization", "Bearer " + tamperedToken))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:239:                .andExpect(jsonPath("$.code").value("INVALID_TOKEN"))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:240:                .andExpect(jsonPath("$.message").value("JWT token signature is invalid or tampered"));
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:244:        @DisplayName("4. JWT signed with wrong secret returns 401 INVALID_TOKEN")
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:245:        void shouldReturn401OnWrongSecret() throws Exception {
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:246:            JwtProperties wrongProps = new JwtProperties(WRONG_SECRET, ISSUER, 3600L);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:247:            JwtTokenProvider wrongProvider = new JwtTokenProvider(wrongProps, Clock.systemUTC());
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:249:            String alienToken = wrongProvider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:252:                    .header("Authorization", "Bearer " + alienToken))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:255:                .andExpect(jsonPath("$.code").value("INVALID_TOKEN"))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:256:                .andExpect(jsonPath("$.message").value("JWT token signature is invalid or tampered"));
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:262:            JwtProperties badIssuerProps = new JwtProperties(TEST_SECRET, "imposter-auth-service", 3600L);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:263:            JwtTokenProvider badIssuerProvider = new JwtTokenProvider(badIssuerProps, Clock.systemUTC());
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:265:            String badIssuerToken = badIssuerProvider.generateToken(auth);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:268:                    .header("Authorization", "Bearer " + badIssuerToken))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:272:                .andExpect(jsonPath("$.message").value("Invalid token issuer"));
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:276:        @DisplayName("6. Token-version mismatch returns 401 TOKEN_EXPIRED")
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:277:        void shouldReturn401OnTokenVersionMismatch() throws Exception {
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:278:            String token = createToken(userAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:288:                    .header("Authorization", "Bearer " + token))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:291:                .andExpect(jsonPath("$.code").value("TOKEN_EXPIRED"))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:292:                .andExpect(jsonPath("$.message").value("Token has been revoked or invalidated by password change"));
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:298:            String token = createToken(userAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:307:                    .header("Authorization", "Bearer " + token))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:317:            String token = createToken(userAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:326:                    .header("Authorization", "Bearer " + token))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:334:        @DisplayName("9. Account not found returns 401 INVALID_TOKEN")
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:336:            String token = createToken(userAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:340:                    .header("Authorization", "Bearer " + token))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:343:                .andExpect(jsonPath("$.code").value("INVALID_TOKEN"))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:344:                .andExpect(jsonPath("$.message").value("Account associated with token no longer exists"));
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:355:            String token = createToken(userAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:359:                    .header("Authorization", "Bearer " + token))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:373:            String token = createToken(userAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:379:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:391:            String token = createToken(userAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:395:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:408:            String token = createToken(userAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:412:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:425:            String token = createToken(userAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:429:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:442:            String token = createToken(userFacultyAId, "facultyA", UserRole.FACULTY, Optional.empty(), Optional.of(facultyAId), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:450:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:462:            String token = createToken(userFacultyAId, "facultyA", UserRole.FACULTY, Optional.empty(), Optional.of(facultyAId), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:472:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:484:            String token = createToken(userAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:496:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:508:            String token = createToken(userAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:521:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:533:            String token = createToken(userFacultyBId, "facultyB", UserRole.FACULTY, Optional.empty(), Optional.of(facultyBId), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:544:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:559:        @DisplayName("20. Security error responses never disclose tokens, passwords, secrets, or internal stack traces")
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:561:            String token = createToken(userAId, "studentA", UserRole.STUDENT, Optional.of(studentAId), Optional.empty(), 1);
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:565:                    .header("Authorization", "Bearer " + token))
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:568:            // Verify absence of sensitive tokens, secrets, or internal keywords
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:570:                .doesNotContain(TEST_SECRET)
+src/test/java/com/amcs/infrastructure/security/error/SecurityErrorHandlingIntegrationTest.java:572:                .doesNotContain("password")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:3:import com.amcs.application.dto.security.ChangePasswordRequest;
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:11:import com.amcs.application.service.PasswordValidator;
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:16:import com.amcs.infrastructure.security.jwt.JwtTokenProvider;
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:29:import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:30:import org.springframework.security.crypto.password.PasswordEncoder;
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:55:    private JwtTokenProvider jwtTokenProvider;
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:58:    private PasswordEncoder passwordEncoder;
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:62:    private final String rawSecret = "super-secret-test-key-must-be-at-least-256-bits-long-32-bytes!";
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:65:    private String hashedSecretPassword;
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:69:        passwordEncoder = new BCryptPasswordEncoder(4); // fast for tests
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:70:        hashedSecretPassword = passwordEncoder.encode("SecretPass123!");
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:72:        jwtProperties = new JwtProperties(rawSecret, "amcs-auth-service", 3600);
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:73:        jwtTokenProvider = new JwtTokenProvider(jwtProperties, Clock.systemUTC());
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:78:            passwordEncoder,
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:79:            new PasswordValidator(),
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:86:            jwtTokenProvider,
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:92:            jwtTokenProvider,
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:108:    private UserAccount createSampleAccount(int tokenVersion, UserAccountStatus status) {
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:113:            hashedSecretPassword,
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:120:            tokenVersion,
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:134:        @DisplayName("Successful login with username returns 200 and valid JWT token")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:139:            LoginRequest request = new LoginRequest("alice", "SecretPass123!");
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:145:                .andExpect(jsonPath("$.token").isNotEmpty())
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:146:                .andExpect(jsonPath("$.tokenType").value("Bearer"))
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:155:        @DisplayName("Successful login with email returns 200 and valid JWT token")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:160:            LoginRequest request = new LoginRequest("alice@univ.edu", "SecretPass123!");
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:166:                .andExpect(jsonPath("$.token").isNotEmpty())
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:171:        @DisplayName("Invalid password returns 401 INVALID_CREDENTIALS")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:172:        void loginInvalidPasswordReturns401() throws Exception {
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:176:            LoginRequest request = new LoginRequest("alice", "WrongPassword123!");
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:184:                .andExpect(jsonPath("$.message").value("Invalid username or password"));
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:219:                userId, "alice", "alice@univ.edu", hashedSecretPassword, UserRole.STUDENT,
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:225:            LoginRequest request = new LoginRequest("alice", "SecretPass123!");
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:241:            LoginRequest request = new LoginRequest("alice", "SecretPass123!");
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:269:        @DisplayName("Authenticated /me request returns profile of current token subject")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:274:            // Generate token
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:275:            String token = jwtTokenProvider.generateToken(new com.amcs.application.dto.security.AuthenticationResult(
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:280:                    .header("Authorization", "Bearer " + token))
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:291:    // 3. CHANGE PASSWORD ENDPOINT TESTS
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:294:    @DisplayName("POST /api/v1/auth/change-password")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:295:    class ChangePasswordTests {
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:298:        @DisplayName("Unauthenticated change-password returns 401 UNAUTHORIZED")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:299:        void changePasswordUnauthenticatedReturns401() throws Exception {
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:300:            ChangePasswordRequest request = new ChangePasswordRequest("SecretPass123!", "NewSecretPass456!");
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:302:            mockMvc.perform(post("/api/v1/auth/change-password")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:311:        @DisplayName("Authenticated change-password with correct credentials succeeds and increments token version")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:312:        void changePasswordSuccess() throws Exception {
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:316:            String token = jwtTokenProvider.generateToken(new com.amcs.application.dto.security.AuthenticationResult(
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:320:            ChangePasswordRequest request = new ChangePasswordRequest("SecretPass123!", "NewSecretPass456!");
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:322:            mockMvc.perform(post("/api/v1/auth/change-password")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:323:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:328:                .andExpect(jsonPath("$.message").value("Password changed successfully"));
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:330:            verify(userAccountRepositoryPort).updatePassword(eq(userId), any());
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:331:            verify(userAccountRepositoryPort).incrementTokenVersion(userId);
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:335:        @DisplayName("Incorrect current password returns 400 INVALID_PASSWORD")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:336:        void changePasswordIncorrectCurrentReturns400() throws Exception {
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:340:            String token = jwtTokenProvider.generateToken(new com.amcs.application.dto.security.AuthenticationResult(
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:344:            ChangePasswordRequest request = new ChangePasswordRequest("WrongCurrentPass123!", "NewSecretPass456!");
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:346:            mockMvc.perform(post("/api/v1/auth/change-password")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:347:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:352:                .andExpect(jsonPath("$.code").value("INVALID_PASSWORD"))
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:353:                .andExpect(jsonPath("$.message").value("Current password does not match"));
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:357:        @DisplayName("New password same as current password returns 400 PASSWORD_POLICY_VIOLATION")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:358:        void changePasswordSameAsOldReturns400() throws Exception {
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:362:            String token = jwtTokenProvider.generateToken(new com.amcs.application.dto.security.AuthenticationResult(
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:366:            ChangePasswordRequest request = new ChangePasswordRequest("SecretPass123!", "SecretPass123!");
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:368:            mockMvc.perform(post("/api/v1/auth/change-password")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:369:                    .header("Authorization", "Bearer " + token)
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:374:                .andExpect(jsonPath("$.code").value("PASSWORD_POLICY_VIOLATION"));
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:378:        @DisplayName("After token version increment, old token is rejected and new token is accepted")
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:379:        void oldTokenRejectedAfterPasswordChange() throws Exception {
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:380:            // Old token issued with version 1
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:381:            String oldToken = jwtTokenProvider.generateToken(new com.amcs.application.dto.security.AuthenticationResult(
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:385:            // Database now reflects incremented token version 2
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:389:            // Request with old token (version 1) must be rejected with 401 TOKEN_EXPIRED
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:391:                    .header("Authorization", "Bearer " + oldToken))
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:393:                .andExpect(jsonPath("$.code").value("TOKEN_EXPIRED"));
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:395:            // Request with new token (version 2) must succeed with 200 OK
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:396:            String newToken = jwtTokenProvider.generateToken(new com.amcs.application.dto.security.AuthenticationResult(
+src/test/java/com/amcs/infrastructure/web/controller/AuthenticationControllerIntegrationTest.java:401:                    .header("Authorization", "Bearer " + newToken))
+src/test/java/com/amcs/infrastructure/persistence/PostgresIntegrationTestBase.java:35:        .withPassword("test_password")
+src/test/java/com/amcs/infrastructure/persistence/PostgresIntegrationTestBase.java:43:            registry.add("spring.datasource.password", postgres::getPassword);
+src/test/java/com/amcs/infrastructure/persistence/adapter/UserAccountPersistenceAdapterTest.java:55:            "$2a$12$hashedPassword",
+src/test/java/com/amcs/infrastructure/persistence/adapter/UserAccountPersistenceAdapterTest.java:78:        assertThat(saved.tokenVersion()).isEqualTo(1);
+src/test/java/com/amcs/infrastructure/persistence/adapter/UserAccountPersistenceAdapterTest.java:96:    @DisplayName("Should update password hash")
+src/test/java/com/amcs/infrastructure/persistence/adapter/UserAccountPersistenceAdapterTest.java:97:    void shouldUpdatePassword() {
+src/test/java/com/amcs/infrastructure/persistence/adapter/UserAccountPersistenceAdapterTest.java:98:        adapter.updatePassword(userId, "$2a$12$newHash");
+src/test/java/com/amcs/infrastructure/persistence/adapter/UserAccountPersistenceAdapterTest.java:99:        verify(userRepository).updatePasswordHash(userId, "$2a$12$newHash");
+src/test/java/com/amcs/infrastructure/persistence/adapter/UserAccountPersistenceAdapterTest.java:118:    @DisplayName("Should increment token version")
+src/test/java/com/amcs/infrastructure/persistence/adapter/UserAccountPersistenceAdapterTest.java:119:    void shouldIncrementTokenVersion() {
+src/test/java/com/amcs/infrastructure/persistence/adapter/UserAccountPersistenceAdapterTest.java:120:        adapter.incrementTokenVersion(userId);
+src/test/java/com/amcs/infrastructure/persistence/adapter/UserAccountPersistenceAdapterTest.java:121:        verify(userRepository).incrementTokenVersion(userId);
+src/main/resources/db/migration/V3__security_and_authentication.sql:14:    password_hash VARCHAR(100) NOT NULL,
+src/main/resources/db/migration/V3__security_and_authentication.sql:21:    token_version INT NOT NULL DEFAULT 1,
+src/main/resources/application.yml:8:    password: ${POSTGRES_PASSWORD:amcs_secret_password}
+src/main/resources/application.yml:33:      secret: ${AMCS_JWT_SECRET:dev-secret-key-for-amcs-local-testing-must-be-at-least-256-bits-long-32-bytes!}
+src/main/java/com/amcs/application/dto/security/ChangePasswordRequest.java:5:public record ChangePasswordRequest(
+src/main/java/com/amcs/application/dto/security/ChangePasswordRequest.java:6:    @NotBlank(message = "Current password is required")
+src/main/java/com/amcs/application/dto/security/ChangePasswordRequest.java:7:    String currentPassword,
+src/main/java/com/amcs/application/dto/security/ChangePasswordRequest.java:9:    @NotBlank(message = "New password is required")
+src/main/java/com/amcs/application/dto/security/ChangePasswordRequest.java:10:    String newPassword
+src/main/java/com/amcs/application/dto/security/ChangePasswordRequest.java:14:        return "ChangePasswordRequest[currentPassword=***, newPassword=***]";
+src/main/java/com/amcs/application/dto/security/LoginCommand.java:10:    String password
+src/main/java/com/amcs/application/dto/security/LoginCommand.java:14:        Objects.requireNonNull(password, "password must not be null");
+src/main/java/com/amcs/application/dto/security/LoginCommand.java:19:        return "LoginCommand[usernameOrEmail=" + usernameOrEmail + ", password=***]";
+src/main/java/com/amcs/application/dto/security/ChangePasswordCommand.java:7: * Command for changing user password.
+src/main/java/com/amcs/application/dto/security/ChangePasswordCommand.java:9:public record ChangePasswordCommand(
+src/main/java/com/amcs/application/dto/security/ChangePasswordCommand.java:11:    String currentPassword,
+src/main/java/com/amcs/application/dto/security/ChangePasswordCommand.java:12:    String newPassword
+src/main/java/com/amcs/application/dto/security/ChangePasswordCommand.java:14:    public ChangePasswordCommand {
+src/main/java/com/amcs/application/dto/security/ChangePasswordCommand.java:16:        Objects.requireNonNull(currentPassword, "currentPassword must not be null");
+src/main/java/com/amcs/application/dto/security/ChangePasswordCommand.java:17:        Objects.requireNonNull(newPassword, "newPassword must not be null");
+src/main/java/com/amcs/application/dto/security/ChangePasswordCommand.java:22:        return "ChangePasswordCommand[userId=" + userId + ", currentPassword=***, newPassword=***]";
+src/main/java/com/amcs/application/dto/security/LoginRequest.java:9:    @NotBlank(message = "Password is required")
+src/main/java/com/amcs/application/dto/security/LoginRequest.java:10:    String password
+src/main/java/com/amcs/application/dto/security/LoginRequest.java:14:        return "LoginRequest[usernameOrEmail=" + usernameOrEmail + ", password=***]";
+src/main/java/com/amcs/application/dto/security/LoginResponse.java:6:    String token,
+src/main/java/com/amcs/application/dto/security/LoginResponse.java:7:    String tokenType,
+src/main/java/com/amcs/application/dto/security/AuthenticationResult.java:11: * Contains no credentials or password hashes.
+src/main/java/com/amcs/application/dto/security/AuthenticationResult.java:20:    int tokenVersion
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:4:import com.amcs.application.dto.security.ChangePasswordCommand;
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:8:import com.amcs.application.exception.InvalidPasswordException;
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:9:import com.amcs.application.exception.PasswordValidationException;
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:15:import org.springframework.security.crypto.password.PasswordEncoder;
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:24: * Application service managing authentication, login tracking, account lockout, and password change.
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:32:    private final PasswordEncoder passwordEncoder;
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:33:    private final PasswordValidator passwordValidator;
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:39:        PasswordEncoder passwordEncoder,
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:40:        PasswordValidator passwordValidator,
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:45:        this.passwordEncoder = Objects.requireNonNull(passwordEncoder, "passwordEncoder");
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:46:        this.passwordValidator = Objects.requireNonNull(passwordValidator, "passwordValidator");
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:52:     * Authenticates a user by username or email and plaintext password.
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:60:                "Invalid username or password",
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:82:        if (passwordEncoder.matches(command.password(), account.passwordHash())) {
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:94:                account.tokenVersion()
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:98:        // Failed password handling: track attempt and lock if threshold reached
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:118:        throw new AuthenticationFailedException("Invalid username or password", FailureReason.INVALID_CREDENTIALS);
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:122:     * Changes a user password after verifying the current password and policy requirements.
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:123:     * Increments token_version to invalidate prior JWTs.
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:125:    public void changePassword(ChangePasswordCommand command) {
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:131:        if (!passwordEncoder.matches(command.currentPassword(), account.passwordHash())) {
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:132:            throw new InvalidPasswordException("Current password does not match");
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:135:        passwordValidator.validate(command.newPassword());
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:137:        if (passwordEncoder.matches(command.newPassword(), account.passwordHash())) {
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:138:            throw new PasswordValidationException("New password must be different from current password");
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:141:        String newPasswordHash = passwordEncoder.encode(command.newPassword());
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:142:        userAccountRepositoryPort.updatePassword(account.id(), newPasswordHash);
+src/main/java/com/amcs/application/service/AuthenticationApplicationService.java:143:        userAccountRepositoryPort.incrementTokenVersion(account.id());
+src/main/java/com/amcs/application/service/PasswordValidator.java:3:import com.amcs.application.exception.PasswordValidationException;
+src/main/java/com/amcs/application/service/PasswordValidator.java:8: * Validates passwords against institutional security policy requirements.
+src/main/java/com/amcs/application/service/PasswordValidator.java:11:public class PasswordValidator {
+src/main/java/com/amcs/application/service/PasswordValidator.java:20:    public PasswordValidator() {
+src/main/java/com/amcs/application/service/PasswordValidator.java:24:    public PasswordValidator(
+src/main/java/com/amcs/application/service/PasswordValidator.java:25:        @Value("${amcs.security.password.min-length:8}") int minLength,
+src/main/java/com/amcs/application/service/PasswordValidator.java:26:        @Value("${amcs.security.password.max-length:128}") int maxLength,
+src/main/java/com/amcs/application/service/PasswordValidator.java:27:        @Value("${amcs.security.password.require-uppercase:true}") boolean requireUppercase,
+src/main/java/com/amcs/application/service/PasswordValidator.java:28:        @Value("${amcs.security.password.require-lowercase:true}") boolean requireLowercase,
+src/main/java/com/amcs/application/service/PasswordValidator.java:29:        @Value("${amcs.security.password.require-digit:true}") boolean requireDigit,
+src/main/java/com/amcs/application/service/PasswordValidator.java:30:        @Value("${amcs.security.password.require-special:true}") boolean requireSpecial
+src/main/java/com/amcs/application/service/PasswordValidator.java:40:    public void validate(String password) {
+src/main/java/com/amcs/application/service/PasswordValidator.java:41:        if (password == null || password.length() < minLength) {
+src/main/java/com/amcs/application/service/PasswordValidator.java:42:            throw new PasswordValidationException("Password must be at least " + minLength + " characters long");
+src/main/java/com/amcs/application/service/PasswordValidator.java:44:        if (password.length() > maxLength) {
+src/main/java/com/amcs/application/service/PasswordValidator.java:45:            throw new PasswordValidationException("Password must not exceed " + maxLength + " characters");
+src/main/java/com/amcs/application/service/PasswordValidator.java:47:        if (requireUppercase && password.chars().noneMatch(Character::isUpperCase)) {
+src/main/java/com/amcs/application/service/PasswordValidator.java:48:            throw new PasswordValidationException("Password must contain at least one uppercase letter");
+src/main/java/com/amcs/application/service/PasswordValidator.java:50:        if (requireLowercase && password.chars().noneMatch(Character::isLowerCase)) {
+src/main/java/com/amcs/application/service/PasswordValidator.java:51:            throw new PasswordValidationException("Password must contain at least one lowercase letter");
+src/main/java/com/amcs/application/service/PasswordValidator.java:53:        if (requireDigit && password.chars().noneMatch(Character::isDigit)) {
+src/main/java/com/amcs/application/service/PasswordValidator.java:54:            throw new PasswordValidationException("Password must contain at least one digit");
+src/main/java/com/amcs/application/service/PasswordValidator.java:56:        if (requireSpecial && password.chars().allMatch(Character::isLetterOrDigit)) {
+src/main/java/com/amcs/application/service/PasswordValidator.java:57:            throw new PasswordValidationException("Password must contain at least one special character or symbol");
+src/main/java/com/amcs/application/port/out/security/UserAccountRepositoryPort.java:26:    void updatePassword(UUID userId, String newPasswordHash);
+src/main/java/com/amcs/application/port/out/security/UserAccountRepositoryPort.java:34:    void incrementTokenVersion(UUID userId);
+src/main/java/com/amcs/application/port/out/security/UserAccount.java:16:    String passwordHash,
+src/main/java/com/amcs/application/port/out/security/UserAccount.java:23:    int tokenVersion,
+src/main/java/com/amcs/application/port/out/security/UserAccount.java:31:        Objects.requireNonNull(passwordHash, "passwordHash must not be null");
+src/main/java/com/amcs/application/exception/PasswordValidationException.java:3:public class PasswordValidationException extends InvalidBusinessOperationException {
+src/main/java/com/amcs/application/exception/PasswordValidationException.java:5:    public PasswordValidationException(String message) {
+src/main/java/com/amcs/application/exception/InvalidPasswordException.java:3:public class InvalidPasswordException extends InvalidBusinessOperationException {
+src/main/java/com/amcs/application/exception/InvalidPasswordException.java:5:    public InvalidPasswordException(String message) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:10: * Enforces minimum 256 bits (32 bytes) of secret entropy.
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:15:    public static final String DEV_FALLBACK_SECRET =
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:16:        "dev-secret-key-for-amcs-local-testing-must-be-at-least-256-bits-long-32-bytes!";
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:18:    private final String secret;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:23:        String secret,
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:27:        this(secret, issuer, expirationSeconds, "");
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:31:        @Value("${amcs.security.jwt.secret}") String secret,
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:36:        if (secret == null || secret.isBlank()) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:37:            throw new IllegalArgumentException("AMCS JWT secret must not be blank");
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:39:        if (isProductionProfile(activeProfiles) && DEV_FALLBACK_SECRET.equals(secret.trim())) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:41:                "Production environment MUST explicitly configure AMCS_JWT_SECRET. " +
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:42:                "The development fallback secret is strictly prohibited in production."
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:45:        byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:46:        if (secretBytes.length < 32) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:48:                "AMCS JWT secret must contain at least 256 bits (32 bytes) of entropy. Provided: " + secretBytes.length + " bytes"
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:58:        this.secret = secret;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:76:    public String getSecret() {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtProperties.java:77:        return secret;
+src/main/java/com/amcs/infrastructure/security/jwt/InvalidJwtException.java:4: * Exception thrown when a JWT token fails cryptographic or structural validation.
+src/main/java/com/amcs/infrastructure/security/jwt/ValidatedTokenClaims.java:11: * Immutable trusted claims extracted after full cryptographic and structural token validation.
+src/main/java/com/amcs/infrastructure/security/jwt/ValidatedTokenClaims.java:13:public record ValidatedTokenClaims(
+src/main/java/com/amcs/infrastructure/security/jwt/ValidatedTokenClaims.java:20:    int tokenVersion,
+src/main/java/com/amcs/infrastructure/security/jwt/ValidatedTokenClaims.java:24:    public ValidatedTokenClaims {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:14:import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:26: * and sets the SecurityContext for incoming Bearer JWT tokens.
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:31:    private final JwtTokenProvider tokenProvider;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:36:        JwtTokenProvider tokenProvider,
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:40:        this.tokenProvider = tokenProvider;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:58:        String rawToken = authHeader.substring(7).trim();
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:59:        if (rawToken.isEmpty()) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:64:        ValidatedTokenClaims claims;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:66:            claims = tokenProvider.parseAndValidate(rawToken);
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:69:                case EXPIRED -> "TOKEN_EXPIRED";
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:70:                case INVALID_SIGNATURE -> "INVALID_TOKEN";
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:71:                case MALFORMED, INVALID_FORMAT -> "MALFORMED_TOKEN";
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:74:                default -> "INVALID_TOKEN";
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:77:                case EXPIRED -> "JWT token has expired";
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:78:                case INVALID_SIGNATURE -> "JWT token signature is invalid or tampered";
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:79:                case MALFORMED, INVALID_FORMAT -> "JWT token structure is malformed";
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:80:                case INVALID_ISSUER -> "Invalid token issuer";
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:81:                case UNSUPPORTED_ALGORITHM -> "JWT token algorithm is unsupported";
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:82:                case MISSING_CLAIMS -> "JWT token is missing required claims";
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:83:                default -> "Invalid token";
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:95:        // Token-version and Account Status Verification
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:98:            request.setAttribute("AMCS_SECURITY_ERROR_CODE", "INVALID_TOKEN");
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:99:            request.setAttribute("AMCS_SECURITY_ERROR_MESSAGE", "Account associated with token no longer exists");
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:120:        if (account.tokenVersion() != claims.tokenVersion()) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:121:            request.setAttribute("AMCS_SECURITY_ERROR_CODE", "TOKEN_EXPIRED");
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:122:            request.setAttribute("AMCS_SECURITY_ERROR_MESSAGE", "Token has been revoked or invalidated by password change");
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:126:                new CredentialsExpiredException("Token version mismatch")
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:139:            claims.tokenVersion()
+src/main/java/com/amcs/infrastructure/security/jwt/JwtAuthenticationFilter.java:142:        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:6:import io.jsonwebtoken.Claims;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:7:import io.jsonwebtoken.ExpiredJwtException;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:8:import io.jsonwebtoken.Jws;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:9:import io.jsonwebtoken.JwtBuilder;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:10:import io.jsonwebtoken.Jwts;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:11:import io.jsonwebtoken.MalformedJwtException;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:12:import io.jsonwebtoken.UnsupportedJwtException;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:13:import io.jsonwebtoken.security.Keys;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:14:import io.jsonwebtoken.security.SecurityException;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:15:import io.jsonwebtoken.security.SignatureException;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:19:import javax.crypto.SecretKey;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:33:public class JwtTokenProvider {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:37:    private final SecretKey secretKey;
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:40:    public JwtTokenProvider(JwtProperties properties) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:44:    public JwtTokenProvider(JwtProperties properties, Clock clock) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:47:        byte[] secretBytes = properties.getSecret().getBytes(StandardCharsets.UTF_8);
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:48:        this.secretKey = Keys.hmacShaKeyFor(secretBytes);
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:52:     * Generates a signed HS256 JWT access token from an AuthenticationResult.
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:54:    public String generateToken(AuthenticationResult auth) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:66:            .claim("tokenVersion", auth.tokenVersion())
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:69:            .signWith(secretKey, Jwts.SIG.HS256);
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:78:     * Cryptographically validates and parses an access token, returning validated claims.
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:80:    public ValidatedTokenClaims parseAndValidate(String token) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:81:        if (token == null || token.isBlank()) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:82:            throw new InvalidJwtException(ErrorCode.INVALID_FORMAT, "JWT token must not be null, empty, or blank");
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:85:        String rawToken = token.startsWith("Bearer ") ? token.substring(7).trim() : token.trim();
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:86:        if (rawToken.isEmpty()) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:87:            throw new InvalidJwtException(ErrorCode.INVALID_FORMAT, "JWT token must not be empty");
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:93:                .verifyWith(secretKey)
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:96:                .parseSignedClaims(rawToken);
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:98:            throw new InvalidJwtException(ErrorCode.EXPIRED, "JWT token has expired", ex);
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:100:            throw new InvalidJwtException(ErrorCode.INVALID_SIGNATURE, "JWT token signature is invalid or tampered", ex);
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:102:            throw new InvalidJwtException(ErrorCode.MALFORMED, "JWT token structure is malformed", ex);
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:104:            throw new InvalidJwtException(ErrorCode.UNSUPPORTED_ALGORITHM, "JWT token algorithm is unsupported", ex);
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:106:            throw new InvalidJwtException(ErrorCode.INVALID_FORMAT, "JWT token argument is invalid: " + ex.getMessage(), ex);
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:123:            throw new InvalidJwtException(ErrorCode.INVALID_ISSUER, "Invalid token issuer: " + issuer);
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:129:            throw new InvalidJwtException(ErrorCode.MISSING_CLAIMS, "Missing subject claim in token");
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:141:            throw new InvalidJwtException(ErrorCode.MISSING_CLAIMS, "Missing username claim in token");
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:147:            throw new InvalidJwtException(ErrorCode.MISSING_CLAIMS, "Missing email claim in token");
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:153:            throw new InvalidJwtException(ErrorCode.MISSING_CLAIMS, "Missing role claim in token");
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:184:        // Validate tokenVersion
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:185:        Integer tokenVersion = payload.get("tokenVersion", Integer.class);
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:186:        if (tokenVersion == null) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:187:            throw new InvalidJwtException(ErrorCode.MISSING_CLAIMS, "Missing tokenVersion claim in token");
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:196:        return new ValidatedTokenClaims(
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:203:            tokenVersion,
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:209:    public boolean isValid(String token) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:211:            parseAndValidate(token);
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:218:    public int extractTokenVersion(String token) {
+src/main/java/com/amcs/infrastructure/security/jwt/JwtTokenProvider.java:219:        return parseAndValidate(token).tokenVersion();
+src/main/java/com/amcs/infrastructure/security/principal/SecurityUserPrincipal.java:16: * Contains no secrets or password hashes.
+src/main/java/com/amcs/infrastructure/security/principal/SecurityUserPrincipal.java:25:    int tokenVersion
+src/main/java/com/amcs/infrastructure/security/principal/SecurityUserPrincipal.java:43:    public String getPassword() {
+src/main/java/com/amcs/infrastructure/security/principal/SecurityUserPrincipal.java:44:        return null; // Secrets are never stored in principal
+src/main/java/com/amcs/infrastructure/security/config/SecurityConfig.java:14:import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+src/main/java/com/amcs/infrastructure/security/config/SecurityConfig.java:56:            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+src/main/java/com/amcs/infrastructure/security/config/SecurityCryptoConfig.java:6:import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+src/main/java/com/amcs/infrastructure/security/config/SecurityCryptoConfig.java:7:import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
+src/main/java/com/amcs/infrastructure/security/config/SecurityCryptoConfig.java:8:import org.springframework.security.crypto.password.PasswordEncoder;
+src/main/java/com/amcs/infrastructure/security/config/SecurityCryptoConfig.java:14: * Infrastructure configuration for secure password hashing.
+src/main/java/com/amcs/infrastructure/security/config/SecurityCryptoConfig.java:15: * Uses DelegatingPasswordEncoder with BCrypt as the primary encoding algorithm.
+src/main/java/com/amcs/infrastructure/security/config/SecurityCryptoConfig.java:21:    public PasswordEncoder passwordEncoder(
+src/main/java/com/amcs/infrastructure/security/config/SecurityCryptoConfig.java:25:        Map<String, PasswordEncoder> encoders = new HashMap<>();
+src/main/java/com/amcs/infrastructure/security/config/SecurityCryptoConfig.java:26:        encoders.put(encodingId, new BCryptPasswordEncoder(bcryptStrength));
+src/main/java/com/amcs/infrastructure/security/config/SecurityCryptoConfig.java:27:        return new DelegatingPasswordEncoder(encodingId, encoders);
+src/main/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapter.java:7:import org.springframework.security.authentication.AnonymousAuthenticationToken;
+src/main/java/com/amcs/infrastructure/security/adapter/SpringSecurityCurrentUserAdapter.java:23:        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:3:import com.amcs.application.dto.security.ChangePasswordCommand;
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:4:import com.amcs.application.dto.security.ChangePasswordRequest;
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:14:import com.amcs.infrastructure.security.jwt.JwtTokenProvider;
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:34:    private final JwtTokenProvider jwtTokenProvider;
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:40:        JwtTokenProvider jwtTokenProvider,
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:45:        this.jwtTokenProvider = Objects.requireNonNull(jwtTokenProvider, "jwtTokenProvider");
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:51:    @Operation(summary = "Authenticate user and receive a JWT access token")
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:54:            new LoginCommand(request.usernameOrEmail(), request.password())
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:57:        String token = jwtTokenProvider.generateToken(result);
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:59:            token,
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:81:    @PostMapping("/change-password")
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:82:    @Operation(summary = "Change password for the current authenticated user")
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:83:    public ResponseEntity<Map<String, String>> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:85:        authService.changePassword(
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:86:            new ChangePasswordCommand(actor.userId(), request.currentPassword(), request.newPassword())
+src/main/java/com/amcs/infrastructure/web/controller/AuthenticationController.java:91:            "message", "Password changed successfully"
+src/main/java/com/amcs/infrastructure/web/error/GlobalRestExceptionHandler.java:156:    @ExceptionHandler(com.amcs.application.exception.InvalidPasswordException.class)
+src/main/java/com/amcs/infrastructure/web/error/GlobalRestExceptionHandler.java:157:    public ResponseEntity<ApiErrorResponse> handleInvalidPassword(
+src/main/java/com/amcs/infrastructure/web/error/GlobalRestExceptionHandler.java:158:        com.amcs.application.exception.InvalidPasswordException ex, HttpServletRequest request
+src/main/java/com/amcs/infrastructure/web/error/GlobalRestExceptionHandler.java:160:        log.warn("Invalid password at [{}]: {}", request.getRequestURI(), ex.getMessage());
+src/main/java/com/amcs/infrastructure/web/error/GlobalRestExceptionHandler.java:162:            .body(ApiErrorResponse.of(400, "INVALID_PASSWORD", ex.getMessage(), request.getRequestURI()));
+src/main/java/com/amcs/infrastructure/web/error/GlobalRestExceptionHandler.java:165:    @ExceptionHandler(com.amcs.application.exception.PasswordValidationException.class)
+src/main/java/com/amcs/infrastructure/web/error/GlobalRestExceptionHandler.java:166:    public ResponseEntity<ApiErrorResponse> handlePasswordValidation(
+src/main/java/com/amcs/infrastructure/web/error/GlobalRestExceptionHandler.java:167:        com.amcs.application.exception.PasswordValidationException ex, HttpServletRequest request
+src/main/java/com/amcs/infrastructure/web/error/GlobalRestExceptionHandler.java:169:        log.warn("Password policy violation at [{}]: {}", request.getRequestURI(), ex.getMessage());
+src/main/java/com/amcs/infrastructure/web/error/GlobalRestExceptionHandler.java:171:            .body(ApiErrorResponse.of(400, "PASSWORD_POLICY_VIOLATION", ex.getMessage(), request.getRequestURI()));
+src/main/java/com/amcs/infrastructure/persistence/repository/SpringDataUserAccountRepository.java:29:    @Query("UPDATE UserAccountEntity u SET u.passwordHash = :passwordHash, u.updatedAt = CURRENT_TIMESTAMP WHERE u.id = :id")
+src/main/java/com/amcs/infrastructure/persistence/repository/SpringDataUserAccountRepository.java:30:    void updatePasswordHash(@Param("id") UUID id, @Param("passwordHash") String passwordHash);
+src/main/java/com/amcs/infrastructure/persistence/repository/SpringDataUserAccountRepository.java:64:    @Query("UPDATE UserAccountEntity u SET u.tokenVersion = u.tokenVersion + 1, u.updatedAt = CURRENT_TIMESTAMP WHERE u.id = :id")
+src/main/java/com/amcs/infrastructure/persistence/repository/SpringDataUserAccountRepository.java:65:    void incrementTokenVersion(@Param("id") UUID id);
+src/main/java/com/amcs/infrastructure/persistence/entity/UserAccountEntity.java:28:    @Column(name = "password_hash", nullable = false, length = 100)
+src/main/java/com/amcs/infrastructure/persistence/entity/UserAccountEntity.java:29:    private String passwordHash;
+src/main/java/com/amcs/infrastructure/persistence/entity/UserAccountEntity.java:51:    @Column(name = "token_version", nullable = false)
+src/main/java/com/amcs/infrastructure/persistence/entity/UserAccountEntity.java:52:    private int tokenVersion = 1;
+src/main/java/com/amcs/infrastructure/persistence/entity/UserAccountEntity.java:66:        String passwordHash,
+src/main/java/com/amcs/infrastructure/persistence/entity/UserAccountEntity.java:73:        int tokenVersion
+src/main/java/com/amcs/infrastructure/persistence/entity/UserAccountEntity.java:78:        this.passwordHash = passwordHash;
+src/main/java/com/amcs/infrastructure/persistence/entity/UserAccountEntity.java:85:        this.tokenVersion = tokenVersion > 0 ? tokenVersion : 1;
+src/main/java/com/amcs/infrastructure/persistence/entity/UserAccountEntity.java:96:    public String getPasswordHash() { return passwordHash; }
+src/main/java/com/amcs/infrastructure/persistence/entity/UserAccountEntity.java:97:    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+src/main/java/com/amcs/infrastructure/persistence/entity/UserAccountEntity.java:110:    public int getTokenVersion() { return tokenVersion; }
+src/main/java/com/amcs/infrastructure/persistence/entity/UserAccountEntity.java:111:    public void setTokenVersion(int tokenVersion) { this.tokenVersion = tokenVersion; }
+src/main/java/com/amcs/infrastructure/persistence/mapper/UserAccountPersistenceMapper.java:22:            entity.getPasswordHash(),
+src/main/java/com/amcs/infrastructure/persistence/mapper/UserAccountPersistenceMapper.java:29:            entity.getTokenVersion(),
+src/main/java/com/amcs/infrastructure/persistence/mapper/UserAccountPersistenceMapper.java:41:            domain.passwordHash(),
+src/main/java/com/amcs/infrastructure/persistence/mapper/UserAccountPersistenceMapper.java:48:            domain.tokenVersion()
+src/main/java/com/amcs/infrastructure/persistence/adapter/UserAccountPersistenceAdapter.java:91:    public void updatePassword(UUID userId, String newPasswordHash) {
+src/main/java/com/amcs/infrastructure/persistence/adapter/UserAccountPersistenceAdapter.java:92:        userRepository.updatePasswordHash(userId, newPasswordHash);
+src/main/java/com/amcs/infrastructure/persistence/adapter/UserAccountPersistenceAdapter.java:115:    public void incrementTokenVersion(UUID userId) {
+src/main/java/com/amcs/infrastructure/persistence/adapter/UserAccountPersistenceAdapter.java:116:        userRepository.incrementTokenVersion(userId);
+.env.example:6:POSTGRES_PASSWORD=amcs_secret_password
+docker-compose.yml:13:      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-amcs_secret_password}"

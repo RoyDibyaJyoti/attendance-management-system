@@ -1,0 +1,21 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Java / Maven
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+
+# VS Code local settings
+.vscode/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
