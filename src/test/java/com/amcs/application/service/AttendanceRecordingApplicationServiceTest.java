@@ -52,6 +52,7 @@ class AttendanceRecordingApplicationServiceTest {
     @Mock private LabGroupRepositoryPort labGroupPort;
     @Mock private SubjectRepositoryPort subjectPort;
     @Mock private AcademicPeriodRepositoryPort periodPort;
+    @Mock private com.amcs.application.security.ApplicationAuthorizationService authorizationService;
 
     private AttendanceRecordingApplicationService service;
 
@@ -69,7 +70,7 @@ class AttendanceRecordingApplicationServiceTest {
     @BeforeEach
     void setUp() {
         service = new AttendanceRecordingApplicationService(
-            sessionPort, recordPort, enrollmentPort, labGroupPort, subjectPort, periodPort);
+            sessionPort, recordPort, enrollmentPort, labGroupPort, subjectPort, periodPort, authorizationService);
 
         scheduledSession = new Session(
             sessionId,

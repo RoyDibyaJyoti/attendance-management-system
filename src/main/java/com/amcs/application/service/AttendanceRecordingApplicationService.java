@@ -56,17 +56,6 @@ public class AttendanceRecordingApplicationService {
         EnrollmentRepositoryPort enrollmentPort,
         LabGroupRepositoryPort labGroupPort,
         com.amcs.application.port.out.SubjectRepositoryPort subjectPort,
-        com.amcs.application.port.out.AcademicPeriodRepositoryPort periodPort
-    ) {
-        this(sessionPort, recordPort, enrollmentPort, labGroupPort, subjectPort, periodPort, null);
-    }
-
-    public AttendanceRecordingApplicationService(
-        SessionRepositoryPort sessionPort,
-        AttendanceRecordRepositoryPort recordPort,
-        EnrollmentRepositoryPort enrollmentPort,
-        LabGroupRepositoryPort labGroupPort,
-        com.amcs.application.port.out.SubjectRepositoryPort subjectPort,
         com.amcs.application.port.out.AcademicPeriodRepositoryPort periodPort,
         com.amcs.application.security.ApplicationAuthorizationService authorizationService
     ) {
@@ -77,7 +66,7 @@ public class AttendanceRecordingApplicationService {
         this.subjectPort = Objects.requireNonNull(subjectPort, "subjectPort");
         this.periodPort = Objects.requireNonNull(periodPort, "periodPort");
         this.integrityValidator = new AttendanceIntegrityValidator();
-        this.authorizationService = authorizationService;
+        this.authorizationService = Objects.requireNonNull(authorizationService, "authorizationService");
     }
 
     /**

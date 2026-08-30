@@ -30,28 +30,18 @@ public class LabGroupApplicationService {
     public LabGroupApplicationService(
         LabGroupRepositoryPort labGroupPort,
         SectionRepositoryPort sectionPort,
-        StudentRepositoryPort studentPort
-    ) {
-        this(labGroupPort, sectionPort, studentPort, null);
-    }
-
-    public LabGroupApplicationService(
-        LabGroupRepositoryPort labGroupPort,
-        SectionRepositoryPort sectionPort,
         StudentRepositoryPort studentPort,
         com.amcs.application.security.ApplicationAuthorizationService authorizationService
     ) {
         this.labGroupPort = Objects.requireNonNull(labGroupPort, "labGroupPort");
         this.sectionPort = Objects.requireNonNull(sectionPort, "sectionPort");
         this.studentPort = Objects.requireNonNull(studentPort, "studentPort");
-        this.authorizationService = authorizationService;
+        this.authorizationService = Objects.requireNonNull(authorizationService, "authorizationService");
     }
 
     @Transactional
     public LabGroupResponse createLabGroup(CreateLabGroupRequest request) {
-        if (authorizationService != null) {
-            authorizationService.requireAdminOnly("create lab groups");
-        }
+        authorizationService.requireAdminOnly("create lab groups");
         sectionPort.findById(request.sectionId())
             .orElseThrow(() -> new ResourceNotFoundException("Section not found: " + request.sectionId()));
 

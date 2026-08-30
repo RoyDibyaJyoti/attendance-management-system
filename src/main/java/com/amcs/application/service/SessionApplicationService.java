@@ -39,16 +39,6 @@ public class SessionApplicationService {
         SubjectRepositoryPort subjectPort,
         SectionRepositoryPort sectionPort,
         FacultyRepositoryPort facultyPort,
-        AcademicPeriodRepositoryPort periodPort
-    ) {
-        this(sessionPort, subjectPort, sectionPort, facultyPort, periodPort, null);
-    }
-
-    public SessionApplicationService(
-        SessionRepositoryPort sessionPort,
-        SubjectRepositoryPort subjectPort,
-        SectionRepositoryPort sectionPort,
-        FacultyRepositoryPort facultyPort,
         AcademicPeriodRepositoryPort periodPort,
         com.amcs.application.security.ApplicationAuthorizationService authorizationService
     ) {
@@ -57,7 +47,7 @@ public class SessionApplicationService {
         this.sectionPort = Objects.requireNonNull(sectionPort, "sectionPort");
         this.facultyPort = Objects.requireNonNull(facultyPort, "facultyPort");
         this.periodPort = Objects.requireNonNull(periodPort, "periodPort");
-        this.authorizationService = authorizationService;
+        this.authorizationService = Objects.requireNonNull(authorizationService, "authorizationService");
     }
 
     @Transactional

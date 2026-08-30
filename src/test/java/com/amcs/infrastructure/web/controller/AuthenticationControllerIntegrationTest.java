@@ -76,7 +76,7 @@ class AuthenticationControllerIntegrationTest {
         authService = new AuthenticationApplicationService(
             userAccountRepositoryPort,
             passwordEncoder,
-            new PasswordValidator(),
+            new PasswordValidator(8, 128, true, true, true, true),
             5,
             900
         );

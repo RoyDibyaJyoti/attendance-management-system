@@ -29,6 +29,7 @@ class StudentApplicationServiceTest {
 
     @Mock private StudentRepositoryPort studentPort;
     @Mock private DepartmentRepositoryPort departmentPort;
+    @Mock private com.amcs.application.security.ApplicationAuthorizationService authorizationService;
 
     private StudentApplicationService service;
 
@@ -37,7 +38,7 @@ class StudentApplicationServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new StudentApplicationService(studentPort, departmentPort);
+        service = new StudentApplicationService(studentPort, departmentPort, authorizationService);
     }
 
     @Test

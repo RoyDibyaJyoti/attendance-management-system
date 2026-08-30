@@ -23,10 +23,6 @@ public class FacultyApplicationService {
     private final DepartmentRepositoryPort departmentPort;
     private final com.amcs.application.security.ApplicationAuthorizationService authorizationService;
 
-    public FacultyApplicationService(FacultyRepositoryPort facultyPort, DepartmentRepositoryPort departmentPort) {
-        this(facultyPort, departmentPort, null);
-    }
-
     public FacultyApplicationService(
         FacultyRepositoryPort facultyPort,
         DepartmentRepositoryPort departmentPort,
@@ -34,14 +30,12 @@ public class FacultyApplicationService {
     ) {
         this.facultyPort = Objects.requireNonNull(facultyPort, "facultyPort");
         this.departmentPort = Objects.requireNonNull(departmentPort, "departmentPort");
-        this.authorizationService = authorizationService;
+        this.authorizationService = Objects.requireNonNull(authorizationService, "authorizationService");
     }
 
     @Transactional
     public FacultyResponse createFaculty(CreateFacultyRequest request) {
-        if (authorizationService != null) {
-            authorizationService.requireAdminOnly("create faculty members");
-        }
+        authorizationService.requireAdminOnly("create faculty members");
         departmentPort.findById(request.departmentId())
             .orElseThrow(() -> new ResourceNotFoundException("Department not found: " + request.departmentId()));
 

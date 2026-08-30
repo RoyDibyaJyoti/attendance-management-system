@@ -28,12 +28,16 @@ import javax.sql.DataSource;
 @Testcontainers(disabledWithoutDocker = true)
 public abstract class PostgresIntegrationTestBase {
 
-    @Container
     protected static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
         .withDatabaseName("amcs_test_db")
         .withUsername("test_user")
-        .withPassword("test_password")
-        .withReuse(false);
+        .withPassword("test_password");
+
+    static {
+        if (org.testcontainers.DockerClientFactory.instance().isDockerAvailable()) {
+            postgres.start();
+        }
+    }
 
     @DynamicPropertySource
     static void configurePostgresProperties(DynamicPropertyRegistry registry) {

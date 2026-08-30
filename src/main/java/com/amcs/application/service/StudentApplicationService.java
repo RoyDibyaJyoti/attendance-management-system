@@ -26,19 +26,12 @@ public class StudentApplicationService {
 
     public StudentApplicationService(
         StudentRepositoryPort studentPort,
-        DepartmentRepositoryPort departmentPort
-    ) {
-        this(studentPort, departmentPort, null);
-    }
-
-    public StudentApplicationService(
-        StudentRepositoryPort studentPort,
         DepartmentRepositoryPort departmentPort,
         com.amcs.application.security.ApplicationAuthorizationService authorizationService
     ) {
         this.studentPort = Objects.requireNonNull(studentPort, "studentPort");
         this.departmentPort = Objects.requireNonNull(departmentPort, "departmentPort");
-        this.authorizationService = authorizationService;
+        this.authorizationService = Objects.requireNonNull(authorizationService, "authorizationService");
     }
 
     @Transactional

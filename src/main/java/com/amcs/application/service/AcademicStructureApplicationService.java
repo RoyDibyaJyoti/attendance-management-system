@@ -42,15 +42,6 @@ public class AcademicStructureApplicationService {
         DepartmentRepositoryPort departmentPort,
         AcademicPeriodRepositoryPort periodPort,
         SectionRepositoryPort sectionPort,
-        SubjectRepositoryPort subjectPort
-    ) {
-        this(departmentPort, periodPort, sectionPort, subjectPort, null);
-    }
-
-    public AcademicStructureApplicationService(
-        DepartmentRepositoryPort departmentPort,
-        AcademicPeriodRepositoryPort periodPort,
-        SectionRepositoryPort sectionPort,
         SubjectRepositoryPort subjectPort,
         com.amcs.application.security.ApplicationAuthorizationService authorizationService
     ) {
@@ -58,7 +49,7 @@ public class AcademicStructureApplicationService {
         this.periodPort = Objects.requireNonNull(periodPort, "periodPort");
         this.sectionPort = Objects.requireNonNull(sectionPort, "sectionPort");
         this.subjectPort = Objects.requireNonNull(subjectPort, "subjectPort");
-        this.authorizationService = authorizationService;
+        this.authorizationService = Objects.requireNonNull(authorizationService, "authorizationService");
     }
 
     // Departments

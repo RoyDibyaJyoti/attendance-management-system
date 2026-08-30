@@ -45,6 +45,7 @@ class SessionApplicationServiceTest {
     @Mock private SectionRepositoryPort sectionPort;
     @Mock private FacultyRepositoryPort facultyPort;
     @Mock private AcademicPeriodRepositoryPort periodPort;
+    @Mock private com.amcs.application.security.ApplicationAuthorizationService authorizationService;
 
     private SessionApplicationService service;
 
@@ -57,7 +58,7 @@ class SessionApplicationServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new SessionApplicationService(sessionPort, subjectPort, sectionPort, facultyPort, periodPort);
+        service = new SessionApplicationService(sessionPort, subjectPort, sectionPort, facultyPort, periodPort, authorizationService);
     }
 
     @Test

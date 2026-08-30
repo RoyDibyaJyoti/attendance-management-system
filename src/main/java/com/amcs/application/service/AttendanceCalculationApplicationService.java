@@ -65,19 +65,6 @@ public class AttendanceCalculationApplicationService {
         EnrollmentRepositoryPort enrollmentPort,
         AttendancePolicyRepositoryPort policyPort,
         OverallAttendancePolicyRepositoryPort overallPolicyPort,
-        AcademicPeriodRepositoryPort periodPort
-    ) {
-        this(studentPort, subjectPort, sessionPort, recordPort, enrollmentPort, policyPort, overallPolicyPort, periodPort, null);
-    }
-
-    public AttendanceCalculationApplicationService(
-        StudentRepositoryPort studentPort,
-        SubjectRepositoryPort subjectPort,
-        SessionRepositoryPort sessionPort,
-        AttendanceRecordRepositoryPort recordPort,
-        EnrollmentRepositoryPort enrollmentPort,
-        AttendancePolicyRepositoryPort policyPort,
-        OverallAttendancePolicyRepositoryPort overallPolicyPort,
         AcademicPeriodRepositoryPort periodPort,
         com.amcs.application.security.ApplicationAuthorizationService authorizationService
     ) {
@@ -90,7 +77,7 @@ public class AttendanceCalculationApplicationService {
         this.overallPolicyPort = Objects.requireNonNull(overallPolicyPort, "overallPolicyPort");
         this.periodPort = Objects.requireNonNull(periodPort, "periodPort");
         this.calculationEngine = new AttendanceCalculationEngine();
-        this.authorizationService = authorizationService;
+        this.authorizationService = Objects.requireNonNull(authorizationService, "authorizationService");
     }
 
     public SubjectAttendanceSummaryResponse calculateSubjectAttendance(

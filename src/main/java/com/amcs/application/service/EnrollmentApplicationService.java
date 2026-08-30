@@ -29,21 +29,13 @@ public class EnrollmentApplicationService {
     public EnrollmentApplicationService(
         EnrollmentRepositoryPort enrollmentPort,
         StudentRepositoryPort studentPort,
-        SectionRepositoryPort sectionPort
-    ) {
-        this(enrollmentPort, studentPort, sectionPort, null);
-    }
-
-    public EnrollmentApplicationService(
-        EnrollmentRepositoryPort enrollmentPort,
-        StudentRepositoryPort studentPort,
         SectionRepositoryPort sectionPort,
         com.amcs.application.security.ApplicationAuthorizationService authorizationService
     ) {
         this.enrollmentPort = Objects.requireNonNull(enrollmentPort, "enrollmentPort");
         this.studentPort = Objects.requireNonNull(studentPort, "studentPort");
         this.sectionPort = Objects.requireNonNull(sectionPort, "sectionPort");
-        this.authorizationService = authorizationService;
+        this.authorizationService = Objects.requireNonNull(authorizationService, "authorizationService");
     }
 
     @Transactional

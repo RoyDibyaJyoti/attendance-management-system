@@ -27,6 +27,7 @@ public class JwtProperties {
         this(secret, issuer, expirationSeconds, "");
     }
 
+    @org.springframework.beans.factory.annotation.Autowired
     public JwtProperties(
         @Value("${amcs.security.jwt.secret}") String secret,
         @Value("${amcs.security.jwt.issuer:amcs-auth-service}") String issuer,

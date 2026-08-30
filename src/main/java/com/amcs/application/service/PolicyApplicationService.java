@@ -33,26 +33,17 @@ public class PolicyApplicationService {
 
     public PolicyApplicationService(
         AttendancePolicyRepositoryPort policyPort,
-        OverallAttendancePolicyRepositoryPort overallPolicyPort
-    ) {
-        this(policyPort, overallPolicyPort, null);
-    }
-
-    public PolicyApplicationService(
-        AttendancePolicyRepositoryPort policyPort,
         OverallAttendancePolicyRepositoryPort overallPolicyPort,
         com.amcs.application.security.ApplicationAuthorizationService authorizationService
     ) {
         this.policyPort = Objects.requireNonNull(policyPort, "policyPort");
         this.overallPolicyPort = Objects.requireNonNull(overallPolicyPort, "overallPolicyPort");
-        this.authorizationService = authorizationService;
+        this.authorizationService = Objects.requireNonNull(authorizationService, "authorizationService");
     }
 
     @Transactional
     public AttendancePolicyResponse createPolicy(CreateAttendancePolicyRequest request) {
-        if (authorizationService != null) {
-            authorizationService.requireAdminOnly("create attendance policies");
-        }
+        authorizationService.requireAdminOnly("create attendance policies");
         List<AttendancePolicy> existing = policyPort.findAllVersions(request.name().trim());
         int nextVersion = existing.isEmpty() ? 1 : existing.getFirst().version() + 1;
 

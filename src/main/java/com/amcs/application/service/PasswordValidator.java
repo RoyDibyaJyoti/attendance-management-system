@@ -17,10 +17,6 @@ public class PasswordValidator {
     private final boolean requireDigit;
     private final boolean requireSpecial;
 
-    public PasswordValidator() {
-        this(8, 128, true, true, true, true);
-    }
-
     public PasswordValidator(
         @Value("${amcs.security.password.min-length:8}") int minLength,
         @Value("${amcs.security.password.max-length:128}") int maxLength,
