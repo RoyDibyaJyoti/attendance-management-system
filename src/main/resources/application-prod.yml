@@ -1,0 +1,73 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAX_POOL_SIZE:20}
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MIN_IDLE:5}
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 20000
+      pool-name: AmcsHikariProdPool
+
+  jpa:
+    show-sql: false
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+    validate-on-migrate: true
+
+server:
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+    prometheus:
+      enabled: true
+    env:
+      enabled: false
+    configprops:
+      enabled: false
+    heapdump:
+      enabled: false
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: production
+
+amcs:
+  security:
+    jwt:
+      secret: ${AMCS_JWT_SECRET}
+      issuer: ${AMCS_JWT_ISSUER:amcs-auth-service}
+      expiration-seconds: ${AMCS_JWT_EXPIRATION_SECONDS:3600}
+    cors:
+      allowed-origins: ${AMCS_CORS_ALLOWED_ORIGINS:https://amcs.university.edu}
+      allowed-methods: GET,POST,PATCH,PUT,DELETE,OPTIONS
+      allowed-headers: Authorization,Content-Type,Accept,X-Requested-With
+      allow-credentials: true
+      max-age-seconds: 3600
+    ratelimit:
+      enabled: true
+      auth-limit-per-minute: ${AMCS_RATE_LIMIT_AUTH:10}
+      heavy-limit-per-minute: ${AMCS_RATE_LIMIT_HEAVY:25}

@@ -26,6 +26,8 @@ public class OpenApiConfig {
                     - Optimistic locking on sessions to prevent lost updates.
                     - Immutable historical attendance policies.
                     - Mathematical shortage analysis and future predictive calculations.
+                    - Streaming low-memory XLSX bulk import pipeline with two-phase staging and commit.
+                    - Streaming XLSX reporting pipeline implementing RPT-001 through RPT-008.
                     """)
                 .contact(new Contact()
                     .name("AMCS Architecture Team")

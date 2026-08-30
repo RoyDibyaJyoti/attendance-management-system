@@ -1,0 +1,50 @@
+name: AMCS CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test-verify:
+    name: Build, Test & Security Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21 (Eclipse Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build & Run Full Test Suite (PostgreSQL Testcontainers)
+        run: mvn clean verify -B
+        env:
+          AMCS_JWT_SECRET: "ci-testing-super-secret-jwt-key-minimum-256-bits-length-32-bytes!"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Hardened Production Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: amcs:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Verify Docker Container Runs as Non-Root User
+        run: |
+          USER_ID=$(docker run --rm amcs:ci id -u)
+          if [ "$USER_ID" -ne 10001 ]; then
+            echo "FAILED: Container is running as UID $USER_ID, expected 10001 (non-root)"
+            exit 1
+          fi
+          echo "SUCCESS: Container runs strictly as UID 10001 (amcs)"

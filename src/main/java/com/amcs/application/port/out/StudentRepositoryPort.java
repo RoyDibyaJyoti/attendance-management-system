@@ -12,5 +12,6 @@ public interface StudentRepositoryPort {
     StudentEntity save(StudentEntity student);
     Optional<StudentEntity> findById(UUID id);
     Optional<StudentEntity> findByRegistrationNumber(String registrationNumber);
+    Optional<StudentEntity> findByEmail(String email);
     List<StudentEntity> findAll();
 }

@@ -35,6 +35,11 @@ public class StudentPersistenceAdapter implements StudentRepositoryPort {
     }
 
     @Override
+    public Optional<StudentEntity> findByEmail(String email) {
+        return repository.findByEmail(email);
+    }
+
+    @Override
     public List<StudentEntity> findAll() {
         return repository.findAll();
     }

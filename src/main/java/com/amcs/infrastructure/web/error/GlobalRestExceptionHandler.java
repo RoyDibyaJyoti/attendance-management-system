@@ -47,6 +47,15 @@ public class GlobalRestExceptionHandler {
             .body(ApiErrorResponse.of(400, "MISSING_PARAMETER", ex.getMessage(), request.getRequestURI()));
     }
 
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handleTypeMismatch(
+        org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex, HttpServletRequest request
+    ) {
+        log.warn("Argument type mismatch for parameter [{}] at [{}]: {}", ex.getName(), request.getRequestURI(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ApiErrorResponse.of(400, "INVALID_ARGUMENT_TYPE", "Invalid parameter: " + ex.getName(), request.getRequestURI()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidationErrors(
         MethodArgumentNotValidException ex, HttpServletRequest request
@@ -214,6 +223,42 @@ public class GlobalRestExceptionHandler {
         log.warn("Application access denied at [{}]: {}", request.getRequestURI(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
             .body(ApiErrorResponse.of(403, "ACCESS_DENIED", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(com.amcs.infrastructure.excel.security.InvalidSpreadsheetException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSpreadsheet(
+        com.amcs.infrastructure.excel.security.InvalidSpreadsheetException ex, HttpServletRequest request
+    ) {
+        log.warn("Invalid spreadsheet at [{}]: [{}] {}", request.getRequestURI(), ex.getErrorCode(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .body(ApiErrorResponse.of(422, ex.getErrorCode(), ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleLifecycleConflict(
+        IllegalStateException ex, HttpServletRequest request
+    ) {
+        log.warn("Lifecycle conflict at [{}]: {}", request.getRequestURI(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ApiErrorResponse.of(409, "LIFECYCLE_CONFLICT", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiErrorResponse> handleIllegalArgument(
+        IllegalArgumentException ex, HttpServletRequest request
+    ) {
+        log.warn("Bad request argument at [{}]: {}", request.getRequestURI(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ApiErrorResponse.of(400, "BAD_REQUEST", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.support.MissingServletRequestPartException.class)
+    public ResponseEntity<ApiErrorResponse> handleMissingRequestPart(
+        org.springframework.web.multipart.support.MissingServletRequestPartException ex, HttpServletRequest request
+    ) {
+        log.warn("Missing multipart file at [{}]: {}", request.getRequestURI(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ApiErrorResponse.of(400, "MISSING_FILE", ex.getMessage(), request.getRequestURI()));
     }
 
     @ExceptionHandler(Exception.class)

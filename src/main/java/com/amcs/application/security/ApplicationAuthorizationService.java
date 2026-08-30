@@ -5,6 +5,8 @@ import com.amcs.application.port.out.security.AuthenticatedActor;
 import com.amcs.application.port.out.security.CurrentUserPort;
 import com.amcs.application.port.out.security.FacultyAssignmentRepositoryPort;
 import com.amcs.domain.attendance.Session;
+import com.amcs.domain.importer.ImportJob;
+import com.amcs.domain.importer.ImportType;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -272,5 +274,146 @@ public class ApplicationAuthorizationService {
             return;
         }
         throw new AccessDeniedException("Access denied: Insufficient privileges to view enrollment history");
+    }
+
+    /**
+     * Enforces role authorization for submitting a bulk import job.
+     */
+    public void requireImportSubmissionAccess(ImportType importType) {
+        AuthenticatedActor actor = currentUserPort.requireCurrentActor();
+        if (actor.isAdmin()) {
+            return;
+        }
+        if (actor.isStudent()) {
+            throw new AccessDeniedException("Access denied: Students are not permitted to submit bulk imports");
+        }
+        if (actor.isFaculty()) {
+            if (importType == ImportType.STUDENTS) {
+                throw new AccessDeniedException("Access denied: Only administrators may import student rosters");
+            }
+            return; // Faculty may submit SESSIONS or ATTENDANCE_RECORDS within their assigned scope
+        }
+        throw new AccessDeniedException("Access denied: Insufficient privileges to submit bulk imports");
+    }
+
+    /**
+     * Enforces IDOR protection when committing or discarding a staged import job.
+     */
+    public void requireImportJobManageAccess(ImportJob job, String operation) {
+        AuthenticatedActor actor = currentUserPort.requireCurrentActor();
+        if (actor.isAdmin()) {
+            return;
+        }
+        if (!job.getCreatedByUserId().equals(actor.userId())) {
+            throw new AccessDeniedException("Access denied: You cannot " + operation + " an import job submitted by another user");
+        }
+    }
+
+    /**
+     * Enforces access control for RPT-001 (Student Attendance Report):
+     * - Student can only access their own attendance report.
+     * - Faculty can access student reports.
+     * - HOD_ADMIN has unrestricted access.
+     */
+    public void requireReport001Access(UUID targetStudentId) {
+        AuthenticatedActor actor = currentUserPort.requireCurrentActor();
+        if (actor.isAdmin() || actor.isFaculty()) {
+            return;
+        }
+        if (actor.isStudent()) {
+            UUID studentId = actor.studentId()
+                .orElseThrow(() -> new AccessDeniedException("No student record linked to account"));
+            if (!studentId.equals(targetStudentId)) {
+                throw new AccessDeniedException("Access denied: Students may only access their own attendance report");
+            }
+            return;
+        }
+        throw new AccessDeniedException("Access denied: Insufficient privileges to access student report");
+    }
+
+    /**
+     * Enforces access control for subject/section-level reports (RPT-002, RPT-003, RPT-004, RPT-008):
+     * - Student is forbidden (403).
+     * - Faculty must be assigned to (subjectId, sectionId, academicPeriodId).
+     * - HOD_ADMIN has unrestricted access.
+     */
+    public void requireSubjectSectionReportAccess(
+        UUID subjectId, UUID sectionId, UUID academicPeriodId, String reportName
+    ) {
+        AuthenticatedActor actor = currentUserPort.requireCurrentActor();
+        if (actor.isAdmin()) {
+            return;
+        }
+        if (actor.isStudent()) {
+            throw new AccessDeniedException("Access denied: Students cannot access " + reportName);
+        }
+        if (actor.isFaculty()) {
+            UUID facultyId = actor.facultyId()
+                .orElseThrow(() -> new AccessDeniedException("No faculty record linked to account"));
+
+            if (subjectId != null && sectionId != null && academicPeriodId != null) {
+                boolean assigned = facultyAssignmentPort.isFacultyAssigned(facultyId, subjectId, sectionId, academicPeriodId);
+                if (!assigned) {
+                    throw new AccessDeniedException("Access denied: Faculty member is not assigned to this subject and section");
+                }
+            }
+            return;
+        }
+        throw new AccessDeniedException("Access denied: Insufficient privileges to access " + reportName);
+    }
+
+    /**
+     * Enforces access control for section-wide or overall reports (RPT-005):
+     * - Student is forbidden (403).
+     * - Faculty must teach in the specified section.
+     * - HOD_ADMIN has unrestricted access.
+     */
+    public void requireSectionReportAccess(UUID sectionId, UUID academicPeriodId, String reportName) {
+        AuthenticatedActor actor = currentUserPort.requireCurrentActor();
+        if (actor.isAdmin()) {
+            return;
+        }
+        if (actor.isStudent()) {
+            throw new AccessDeniedException("Access denied: Students cannot access " + reportName);
+        }
+        if (actor.isFaculty()) {
+            UUID facultyId = actor.facultyId()
+                .orElseThrow(() -> new AccessDeniedException("No faculty record linked to account"));
+
+            if (sectionId != null && academicPeriodId != null) {
+                boolean assigned = facultyAssignmentPort.findByFacultyIdAndAcademicPeriodId(facultyId, academicPeriodId)
+                    .stream().anyMatch(a -> a.sectionId().equals(sectionId));
+                if (!assigned) {
+                    throw new AccessDeniedException("Access denied: Faculty member is not assigned to any subject in this section");
+                }
+            }
+            return;
+        }
+        throw new AccessDeniedException("Access denied: Insufficient privileges to access " + reportName);
+    }
+
+    /**
+     * Enforces access control for faculty marking compliance reports (RPT-006):
+     * - Student is forbidden (403).
+     * - Faculty can only inspect their own compliance report.
+     * - HOD_ADMIN has unrestricted access.
+     */
+    public void requireFacultyComplianceReportAccess(UUID targetFacultyId) {
+        AuthenticatedActor actor = currentUserPort.requireCurrentActor();
+        if (actor.isAdmin()) {
+            return;
+        }
+        if (actor.isStudent()) {
+            throw new AccessDeniedException("Access denied: Students cannot access faculty compliance reports");
+        }
+        if (actor.isFaculty()) {
+            UUID facultyId = actor.facultyId()
+                .orElseThrow(() -> new AccessDeniedException("No faculty record linked to account"));
+            if (targetFacultyId != null && !targetFacultyId.equals(facultyId)) {
+                throw new AccessDeniedException("Access denied: Faculty members cannot view compliance reports of other faculty");
+            }
+            return;
+        }
+        throw new AccessDeniedException("Access denied: Insufficient privileges to access faculty compliance report");
     }
 }
