@@ -7,7 +7,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 export function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <ToastProvider>
         <AuthProvider>
           <ErrorBoundary>
