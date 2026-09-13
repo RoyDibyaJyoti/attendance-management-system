@@ -19,3 +19,8 @@ target/
 
 # Logs
 *.log
+
+# Temporary test/debug outputs
+check.txt
+*.tmp
+
