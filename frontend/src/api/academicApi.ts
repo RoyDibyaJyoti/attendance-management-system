@@ -13,14 +13,22 @@ import { PagedResponse } from '../types/api';
 
 export const academicApi = {
   // Departments
-  getDepartments: (): Promise<DepartmentResponse[]> => {
-    return apiClient<DepartmentResponse[]>('/academic/departments');
+  getDepartments: (includeInactive: boolean = false): Promise<DepartmentResponse[]> => {
+    return apiClient<DepartmentResponse[]>('/academic/departments', {
+      params: { includeInactive }
+    });
   },
   createDepartment: (data: CreateDepartmentRequest): Promise<DepartmentResponse> => {
     return apiClient<DepartmentResponse>('/academic/departments', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  },
+  deactivateDepartment: (id: string): Promise<DepartmentResponse> => {
+    return apiClient<DepartmentResponse>(`/academic/departments/${id}/deactivate`, { method: 'PATCH' });
+  },
+  reactivateDepartment: (id: string): Promise<DepartmentResponse> => {
+    return apiClient<DepartmentResponse>(`/academic/departments/${id}/reactivate`, { method: 'PATCH' });
   },
 
   // Academic Periods
@@ -35,14 +43,20 @@ export const academicApi = {
   },
 
   // Sections — backend REQUIRES periodId query param
-  getSectionsByPeriod: (periodId: string): Promise<SectionResponse[]> => {
+  getSectionsByPeriod: (periodId: string, includeInactive: boolean = false): Promise<SectionResponse[]> => {
     return apiClient<SectionResponse[]>('/academic/sections', {
-      params: { periodId },
+      params: { periodId, includeInactive },
     });
   },
 
   getSectionById: (sectionId: string): Promise<SectionResponse> => {
     return apiClient<SectionResponse>(`/academic/sections/${sectionId}`);
+  },
+  deactivateSection: (id: string): Promise<SectionResponse> => {
+    return apiClient<SectionResponse>(`/academic/sections/${id}/deactivate`, { method: 'PATCH' });
+  },
+  reactivateSection: (id: string): Promise<SectionResponse> => {
+    return apiClient<SectionResponse>(`/academic/sections/${id}/reactivate`, { method: 'PATCH' });
   },
 
   // Convenience: get sections across all periods
@@ -76,9 +90,9 @@ export const academicApi = {
   },
 
   // Subjects
-  getSubjects: (page: number = 0, size: number = 20): Promise<PagedResponse<SubjectResponse>> => {
+  getSubjects: (page: number = 0, size: number = 20, includeInactive: boolean = false): Promise<PagedResponse<SubjectResponse>> => {
     return apiClient<PagedResponse<SubjectResponse>>('/academic/subjects', {
-      params: { page, size },
+      params: { page, size, includeInactive },
     });
   },
   getAllSubjects: async (): Promise<SubjectResponse[]> => {
@@ -87,10 +101,19 @@ export const academicApi = {
     });
     return res.content;
   },
+  getSubjectById: (subjectId: string): Promise<SubjectResponse> => {
+    return apiClient<SubjectResponse>(`/academic/subjects/${subjectId}`);
+  },
   createSubject: (data: CreateSubjectRequest): Promise<SubjectResponse> => {
     return apiClient<SubjectResponse>('/academic/subjects', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  },
+  deactivateSubject: (id: string): Promise<SubjectResponse> => {
+    return apiClient<SubjectResponse>(`/academic/subjects/${id}/deactivate`, { method: 'PATCH' });
+  },
+  reactivateSubject: (id: string): Promise<SubjectResponse> => {
+    return apiClient<SubjectResponse>(`/academic/subjects/${id}/reactivate`, { method: 'PATCH' });
   },
 };

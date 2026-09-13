@@ -1,5 +1,6 @@
 package com.amcs.application.port.out.security;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,7 +18,11 @@ public interface FacultyAssignmentRepositoryPort {
 
     List<FacultyAssignment> findByFacultyIdAndAcademicPeriodId(UUID facultyId, UUID academicPeriodId);
 
-    boolean isFacultyAssigned(UUID facultyId, UUID subjectId, UUID sectionId, UUID academicPeriodId);
+    List<FacultyAssignment> findBySectionId(UUID sectionId);
 
-    boolean existsAssignment(UUID facultyId, UUID subjectId, UUID sectionId, UUID academicPeriodId);
+    // Get active assignments for a given day
+    boolean isFacultyAssigned(UUID facultyId, UUID subjectId, UUID sectionId, UUID academicPeriodId, LocalDate date);
+
+    // Find overlapping assignments for a context
+    List<FacultyAssignment> findOverlappingAssignments(UUID subjectId, UUID sectionId, UUID academicPeriodId, LocalDate start, LocalDate end);
 }

@@ -4,6 +4,7 @@ export interface FacultyResponse {
   name: string;
   email: string;
   departmentId: string;
+  isActive?: boolean;
 }
 
 export interface CreateFacultyRequest {

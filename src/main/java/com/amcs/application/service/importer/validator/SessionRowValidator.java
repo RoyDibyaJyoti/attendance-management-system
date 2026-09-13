@@ -183,7 +183,7 @@ public class SessionRowValidator {
             }
 
             boolean assigned = facultyAssignmentRepository.isFacultyAssigned(
-                faculty.getId(), subject.id(), section.getId(), section.getAcademicPeriodId()
+                faculty.getId(), subject.id(), section.getId(), section.getAcademicPeriodId(), sessionDate
             );
             if (!assigned) {
                 return ValidationOutcome.invalid(new RowValidationError(

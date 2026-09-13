@@ -55,7 +55,7 @@ class StudentControllerTest {
     @DisplayName("POST /api/v1/students returns 201 Created on valid input")
     void shouldCreateStudent() throws Exception {
         CreateStudentRequest request = new CreateStudentRequest("CS2026-001", "Bob Smith", "bob@univ.edu", deptId);
-        StudentResponse response = new StudentResponse(studentId, "CS2026-001", "Bob Smith", "bob@univ.edu", deptId, Instant.now());
+        StudentResponse response = new StudentResponse(studentId, "CS2026-001", "Bob Smith", "bob@univ.edu", deptId, Instant.now(), true);
 
         when(studentService.createStudent(any())).thenReturn(response);
 
@@ -98,7 +98,7 @@ class StudentControllerTest {
     @Test
     @DisplayName("GET /api/v1/students/{id} returns 200 OK")
     void shouldGetStudentById() throws Exception {
-        StudentResponse response = new StudentResponse(studentId, "CS2026-001", "Bob Smith", "bob@univ.edu", deptId, Instant.now());
+        StudentResponse response = new StudentResponse(studentId, "CS2026-001", "Bob Smith", "bob@univ.edu", deptId, Instant.now(), true);
 
         when(studentService.getStudentById(studentId)).thenReturn(response);
 
@@ -122,7 +122,7 @@ class StudentControllerTest {
     @DisplayName("PATCH /api/v1/students/{id} updates contact info")
     void shouldUpdateStudent() throws Exception {
         UpdateStudentRequest request = new UpdateStudentRequest("Bob Johnson", "bobj@univ.edu");
-        StudentResponse response = new StudentResponse(studentId, "CS2026-001", "Bob Johnson", "bobj@univ.edu", deptId, Instant.now());
+        StudentResponse response = new StudentResponse(studentId, "CS2026-001", "Bob Johnson", "bobj@univ.edu", deptId, Instant.now(), true);
 
         when(studentService.updateStudent(eq(studentId), any())).thenReturn(response);
 

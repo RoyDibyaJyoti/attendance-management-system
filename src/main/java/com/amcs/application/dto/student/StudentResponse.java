@@ -9,5 +9,6 @@ public record StudentResponse(
     String name,
     String email,
     UUID departmentId,
-    Instant createdAt
+    Instant createdAt,
+    boolean isActive
 ) {}

@@ -16,6 +16,7 @@ import com.amcs.infrastructure.persistence.repository.SpringDataSubjectRepositor
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -86,12 +87,32 @@ public class FacultyAssignmentPersistenceAdapter implements FacultyAssignmentRep
     }
 
     @Override
-    public boolean isFacultyAssigned(UUID facultyId, UUID subjectId, UUID sectionId, UUID academicPeriodId) {
-        return assignmentRepository.isFacultyAssigned(facultyId, subjectId, sectionId, academicPeriodId);
+    public List<FacultyAssignment> findBySectionId(UUID sectionId) {
+        return assignmentRepository.findBySectionId(sectionId)
+            .stream()
+            .map(mapper::toDomain)
+            .toList();
     }
 
     @Override
-    public boolean existsAssignment(UUID facultyId, UUID subjectId, UUID sectionId, UUID academicPeriodId) {
-        return assignmentRepository.isFacultyAssigned(facultyId, subjectId, sectionId, academicPeriodId);
+    public boolean isFacultyAssigned(UUID facultyId, UUID subjectId, UUID sectionId, UUID academicPeriodId, LocalDate date) {
+        return assignmentRepository.isFacultyAssigned(facultyId, subjectId, sectionId, academicPeriodId, date);
+    }
+
+    @Override
+    public List<FacultyAssignment> findOverlappingAssignments(UUID subjectId, UUID sectionId, UUID academicPeriodId, LocalDate start, LocalDate end) {
+        if (start != null && end != null) {
+            return assignmentRepository.findOverlappingAssignments(subjectId, sectionId, academicPeriodId, start, end)
+                .stream().map(mapper::toDomain).toList();
+        } else if (start != null && end == null) {
+            return assignmentRepository.findOverlappingAssignmentsStartOnly(subjectId, sectionId, academicPeriodId, start)
+                .stream().map(mapper::toDomain).toList();
+        } else if (start == null && end != null) {
+            return assignmentRepository.findOverlappingAssignmentsOpenEnded(subjectId, sectionId, academicPeriodId, end)
+                .stream().map(mapper::toDomain).toList();
+        } else {
+            return assignmentRepository.findOverlappingAssignmentsNoBounds(subjectId, sectionId, academicPeriodId)
+                .stream().map(mapper::toDomain).toList();
+        }
     }
 }

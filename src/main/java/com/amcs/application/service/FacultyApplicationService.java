@@ -3,6 +3,7 @@ package com.amcs.application.service;
 import com.amcs.application.dto.common.PagedResponse;
 import com.amcs.application.dto.faculty.CreateFacultyRequest;
 import com.amcs.application.dto.faculty.FacultyResponse;
+import com.amcs.application.dto.faculty.UpdateFacultyRequest;
 import com.amcs.application.exception.DuplicateResourceException;
 import com.amcs.application.exception.ResourceNotFoundException;
 import com.amcs.application.port.out.DepartmentRepositoryPort;
@@ -65,11 +66,40 @@ public class FacultyApplicationService {
             .orElseThrow(() -> new ResourceNotFoundException("Faculty not found with ID: " + id));
     }
 
-    public PagedResponse<FacultyResponse> listFaculty(int page, int size) {
+    @Transactional
+    public FacultyResponse updateFaculty(UUID id, UpdateFacultyRequest request) {
+        authorizationService.requireAdminOnly("update faculty members");
+        FacultyEntity entity = facultyPort.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Faculty not found with ID: " + id));
+
+        if (request.name() != null && !request.name().isBlank()) {
+            entity.setName(request.name().trim());
+        }
+        if (request.email() != null && !request.email().isBlank()) {
+            entity.setEmail(request.email().trim().toLowerCase());
+        }
+
+        FacultyEntity saved = facultyPort.save(entity);
+        return toResponse(saved);
+    }
+
+    @Transactional
+    public FacultyResponse setFacultyActiveStatus(UUID id, boolean isActive) {
+        authorizationService.requireAdminOnly("deactivate/reactivate faculty members");
+        FacultyEntity entity = facultyPort.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Faculty not found with ID: " + id));
+
+        entity.setActive(isActive);
+        FacultyEntity saved = facultyPort.save(entity);
+        return toResponse(saved);
+    }
+
+    public PagedResponse<FacultyResponse> listFaculty(int page, int size, boolean includeInactive) {
         if (authorizationService != null) {
             authorizationService.requireFacultyOrAdmin("list faculty members");
         }
         List<FacultyResponse> all = facultyPort.findAll().stream()
+            .filter(f -> includeInactive || f.isActive())
             .map(this::toResponse)
             .toList();
         return PagedResponse.of(all, page, size);
@@ -81,7 +111,8 @@ public class FacultyApplicationService {
             entity.getEmployeeId(),
             entity.getName(),
             entity.getEmail(),
-            entity.getDepartmentId()
+            entity.getDepartmentId(),
+            entity.isActive()
         );
     }
 }

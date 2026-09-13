@@ -148,11 +148,11 @@ public class DatabaseDataInitializer implements ApplicationRunner {
 
         // 5. Subjects
         UUID theorySubId = UUID.randomUUID();
-        Subject theorySub = new Subject(theorySubId, "Operating Systems", "CS301", CourseType.THEORY, 3);
+        Subject theorySub = new Subject(theorySubId, "Operating Systems", "CS301", CourseType.THEORY, 3, true);
         subjectPort.save(theorySub, deptId);
 
         UUID labSubId = UUID.randomUUID();
-        Subject labSub = new Subject(labSubId, "Database Systems Lab", "CS302L", CourseType.LABORATORY, 2);
+        Subject labSub = new Subject(labSubId, "Database Systems Lab", "CS302L", CourseType.LABORATORY, 2, true);
         subjectPort.save(labSub, deptId);
 
         // 6. Faculty
@@ -181,9 +181,9 @@ public class DatabaseDataInitializer implements ApplicationRunner {
 
         // Assign faculty to section & subjects
         assignmentPort.save(new com.amcs.application.port.out.security.FacultyAssignment(
-            UUID.randomUUID(), facultyId, theorySubId, sectionId, periodId, true, now));
+            UUID.randomUUID(), facultyId, theorySubId, sectionId, periodId, LocalDate.of(2026, 8, 1), null, "ACTIVE", now));
         assignmentPort.save(new com.amcs.application.port.out.security.FacultyAssignment(
-            UUID.randomUUID(), facultyId, labSubId, sectionId, periodId, true, now));
+            UUID.randomUUID(), facultyId, labSubId, sectionId, periodId, LocalDate.of(2026, 8, 1), null, "ACTIVE", now));
 
         // 7. Students & Enrollments
         UUID student1Id = UUID.randomUUID();

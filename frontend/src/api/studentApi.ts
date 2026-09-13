@@ -3,9 +3,9 @@ import { CreateStudentRequest, StudentResponse, UpdateStudentRequest } from '../
 import { PagedResponse } from '../types/api';
 
 export const studentApi = {
-  getStudents: (page: number = 0, size: number = 20): Promise<PagedResponse<StudentResponse>> => {
+  getStudents: (page: number = 0, size: number = 20, includeInactive: boolean = false): Promise<PagedResponse<StudentResponse>> => {
     return apiClient<PagedResponse<StudentResponse>>('/students', {
-      params: { page, size },
+      params: { page, size, includeInactive },
     });
   },
 
@@ -36,5 +36,13 @@ export const studentApi = {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
+  },
+
+  deactivateStudent: (id: string): Promise<StudentResponse> => {
+    return apiClient<StudentResponse>(`/students/${id}/deactivate`, { method: 'PATCH' });
+  },
+
+  reactivateStudent: (id: string): Promise<StudentResponse> => {
+    return apiClient<StudentResponse>(`/students/${id}/reactivate`, { method: 'PATCH' });
   },
 };

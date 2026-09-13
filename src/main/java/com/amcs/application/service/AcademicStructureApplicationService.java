@@ -8,6 +8,9 @@ import com.amcs.application.dto.academic.CreateSubjectRequest;
 import com.amcs.application.dto.academic.DepartmentResponse;
 import com.amcs.application.dto.academic.SectionResponse;
 import com.amcs.application.dto.academic.SubjectResponse;
+import com.amcs.application.dto.academic.UpdateDepartmentRequest;
+import com.amcs.application.dto.academic.UpdateSectionRequest;
+import com.amcs.application.dto.academic.UpdateSubjectRequest;
 import com.amcs.application.dto.common.PagedResponse;
 import com.amcs.application.exception.DuplicateResourceException;
 import com.amcs.application.exception.InvalidBusinessOperationException;
@@ -64,12 +67,37 @@ public class AcademicStructureApplicationService {
         }
         DepartmentEntity entity = new DepartmentEntity(UUID.randomUUID(), request.code().trim().toUpperCase(), request.name().trim());
         DepartmentEntity saved = departmentPort.save(entity);
-        return new DepartmentResponse(saved.getId(), saved.getCode(), saved.getName());
+        return new DepartmentResponse(saved.getId(), saved.getCode(), saved.getName(), saved.isActive());
     }
 
-    public List<DepartmentResponse> listDepartments() {
+    @Transactional
+    public DepartmentResponse updateDepartment(UUID id, UpdateDepartmentRequest request) {
+        if (authorizationService != null) {
+            authorizationService.requireAdminOnly("update departments");
+        }
+        DepartmentEntity entity = departmentPort.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Department not found: " + id));
+        entity.setName(request.name().trim());
+        DepartmentEntity saved = departmentPort.save(entity);
+        return new DepartmentResponse(saved.getId(), saved.getCode(), saved.getName(), saved.isActive());
+    }
+
+    @Transactional
+    public DepartmentResponse setDepartmentActiveStatus(UUID id, boolean isActive) {
+        if (authorizationService != null) {
+            authorizationService.requireAdminOnly("deactivate/reactivate departments");
+        }
+        DepartmentEntity entity = departmentPort.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Department not found: " + id));
+        entity.setActive(isActive);
+        DepartmentEntity saved = departmentPort.save(entity);
+        return new DepartmentResponse(saved.getId(), saved.getCode(), saved.getName(), saved.isActive());
+    }
+
+    public List<DepartmentResponse> listDepartments(boolean includeInactive) {
         return departmentPort.findAll().stream()
-            .map(d -> new DepartmentResponse(d.getId(), d.getCode(), d.getName()))
+            .filter(d -> includeInactive || d.isActive())
+            .map(d -> new DepartmentResponse(d.getId(), d.getCode(), d.getName(), d.isActive()))
             .toList();
     }
 
@@ -111,19 +139,44 @@ public class AcademicStructureApplicationService {
         SectionEntity entity = new SectionEntity(
             UUID.randomUUID(), request.name().trim(), request.departmentId(), request.academicPeriodId());
         SectionEntity saved = sectionPort.save(entity);
-        return new SectionResponse(saved.getId(), saved.getName(), saved.getDepartmentId(), saved.getAcademicPeriodId());
+        return new SectionResponse(saved.getId(), saved.getName(), saved.getDepartmentId(), saved.getAcademicPeriodId(), saved.isActive());
     }
 
-    public List<SectionResponse> listSectionsByPeriod(UUID academicPeriodId) {
+    @Transactional
+    public SectionResponse updateSection(UUID id, UpdateSectionRequest request) {
+        if (authorizationService != null) {
+            authorizationService.requireAdminOnly("update sections");
+        }
+        SectionEntity entity = sectionPort.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Section not found: " + id));
+        entity.setName(request.name().trim());
+        SectionEntity saved = sectionPort.save(entity);
+        return new SectionResponse(saved.getId(), saved.getName(), saved.getDepartmentId(), saved.getAcademicPeriodId(), saved.isActive());
+    }
+
+    @Transactional
+    public SectionResponse setSectionActiveStatus(UUID id, boolean isActive) {
+        if (authorizationService != null) {
+            authorizationService.requireAdminOnly("deactivate/reactivate sections");
+        }
+        SectionEntity entity = sectionPort.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Section not found: " + id));
+        entity.setActive(isActive);
+        SectionEntity saved = sectionPort.save(entity);
+        return new SectionResponse(saved.getId(), saved.getName(), saved.getDepartmentId(), saved.getAcademicPeriodId(), saved.isActive());
+    }
+
+    public List<SectionResponse> listSectionsByPeriod(UUID academicPeriodId, boolean includeInactive) {
         return sectionPort.findByAcademicPeriod(academicPeriodId).stream()
-            .map(s -> new SectionResponse(s.getId(), s.getName(), s.getDepartmentId(), s.getAcademicPeriodId()))
+            .filter(s -> includeInactive || s.isActive())
+            .map(s -> new SectionResponse(s.getId(), s.getName(), s.getDepartmentId(), s.getAcademicPeriodId(), s.isActive()))
             .toList();
     }
 
     public SectionResponse getSection(UUID sectionId) {
         SectionEntity entity = sectionPort.findById(sectionId)
             .orElseThrow(() -> new ResourceNotFoundException("Section not found: " + sectionId));
-        return new SectionResponse(entity.getId(), entity.getName(), entity.getDepartmentId(), entity.getAcademicPeriodId());
+        return new SectionResponse(entity.getId(), entity.getName(), entity.getDepartmentId(), entity.getAcademicPeriodId(), entity.isActive());
     }
 
     // Subjects
@@ -145,16 +198,48 @@ public class AcademicStructureApplicationService {
             request.name().trim(),
             request.code().trim().toUpperCase(),
             CourseType.valueOf(request.courseType()),
-            request.creditHours()
+            request.creditHours(),
+            true
         );
 
         Subject saved = subjectPort.save(domainSubject, request.departmentId());
-        return new SubjectResponse(saved.id(), saved.code(), saved.name(), saved.courseType().name(), saved.creditHours());
+        return new SubjectResponse(saved.id(), saved.code(), saved.name(), saved.courseType().name(), saved.creditHours(), saved.isActive());
     }
 
-    public PagedResponse<SubjectResponse> listSubjects(int page, int size) {
+    @Transactional
+    public SubjectResponse updateSubject(UUID id, UpdateSubjectRequest request) {
+        if (authorizationService != null) {
+            authorizationService.requireAdminOnly("update subjects");
+        }
+        Subject domainSubject = subjectPort.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Subject not found: " + id));
+            
+        Subject updated = new Subject(
+            domainSubject.id(),
+            request.name().trim(),
+            domainSubject.code(),
+            CourseType.valueOf(request.courseType()),
+            request.creditHours(),
+            domainSubject.isActive()
+        );
+        
+        Subject saved = subjectPort.update(updated); 
+        return new SubjectResponse(saved.id(), saved.code(), saved.name(), saved.courseType().name(), saved.creditHours(), saved.isActive());
+    }
+
+    @Transactional
+    public SubjectResponse setSubjectActiveStatus(UUID id, boolean isActive) {
+        if (authorizationService != null) {
+            authorizationService.requireAdminOnly("deactivate/reactivate subjects");
+        }
+        Subject saved = subjectPort.setActiveStatus(id, isActive);
+        return new SubjectResponse(saved.id(), saved.code(), saved.name(), saved.courseType().name(), saved.creditHours(), saved.isActive());
+    }
+
+    public PagedResponse<SubjectResponse> listSubjects(int page, int size, boolean includeInactive) {
         List<SubjectResponse> all = subjectPort.findAll().stream()
-            .map(s -> new SubjectResponse(s.id(), s.code(), s.name(), s.courseType().name(), s.creditHours()))
+            .filter(s -> includeInactive || s.isActive())
+            .map(s -> new SubjectResponse(s.id(), s.code(), s.name(), s.courseType().name(), s.creditHours(), s.isActive()))
             .toList();
         return PagedResponse.of(all, page, size);
     }

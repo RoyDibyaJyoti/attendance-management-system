@@ -5,6 +5,7 @@ export interface StudentResponse {
   email: string;
   departmentId: string;
   createdAt: string;
+  isActive?: boolean;
 }
 
 export interface CreateStudentRequest {

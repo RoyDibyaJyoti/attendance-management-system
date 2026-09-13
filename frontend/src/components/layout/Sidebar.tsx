@@ -15,6 +15,7 @@ import {
   Award,
   CheckCircle2,
   UserCheck,
+  Briefcase,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -138,6 +139,10 @@ export const Sidebar: React.FC = () => {
                 <NavLink to="/admin/faculty" className={navItemClass}>
                   <Users className="w-4 h-4 shrink-0" />
                   <span>Faculty Directory</span>
+                </NavLink>
+                <NavLink to="/admin/faculty-assignments" className={navItemClass}>
+                  <Briefcase className="w-4 h-4 shrink-0" />
+                  <span>Faculty Assignments</span>
                 </NavLink>
                 <NavLink to="/admin/students" className={navItemClass}>
                   <GraduationCap className="w-4 h-4 shrink-0" />

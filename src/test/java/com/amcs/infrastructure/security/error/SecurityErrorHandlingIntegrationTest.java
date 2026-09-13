@@ -71,6 +71,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
@@ -462,7 +464,9 @@ class SecurityErrorHandlingIntegrationTest {
             String token = createToken(userFacultyAId, "facultyA", UserRole.FACULTY, Optional.empty(), Optional.of(facultyAId), 1);
             mockActiveAccount(userFacultyAId, "facultyA", UserRole.FACULTY, Optional.empty(), Optional.of(facultyAId), 1);
 
-            when(facultyAssignmentPort.isFacultyAssigned(facultyAId, subjectId, sectionId, periodId)).thenReturn(false);
+            when(facultyAssignmentPort.isFacultyAssigned(
+                eq(facultyAId), eq(subjectId), eq(sectionId), eq(periodId), any(LocalDate.class)
+            )).thenReturn(false);
 
             CreateSessionRequest request = new CreateSessionRequest(
                 subjectId, sectionId, facultyAId, periodId, LocalDate.of(2026, 9, 15), "THEORY", 1, null

@@ -77,11 +77,12 @@ public class StudentApplicationService {
             .orElseThrow(() -> new ResourceNotFoundException("Student not found with registration number: " + regNo));
     }
 
-    public PagedResponse<StudentResponse> listStudents(int page, int size) {
+    public PagedResponse<StudentResponse> listStudents(int page, int size, boolean includeInactive) {
         if (authorizationService != null) {
             authorizationService.requireFacultyOrAdmin("list students");
         }
         List<StudentResponse> all = studentPort.findAll().stream()
+            .filter(s -> includeInactive || s.isActive())
             .map(this::toResponse)
             .toList();
         return PagedResponse.of(all, page, size);
@@ -106,6 +107,19 @@ public class StudentApplicationService {
         return toResponse(updated);
     }
 
+    @Transactional
+    public StudentResponse setStudentActiveStatus(UUID id, boolean isActive) {
+        if (authorizationService != null) {
+            authorizationService.requireAdminOnly("deactivate/reactivate students");
+        }
+        StudentEntity entity = studentPort.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + id));
+
+        entity.setActive(isActive);
+        StudentEntity saved = studentPort.save(entity);
+        return toResponse(saved);
+    }
+
     private StudentResponse toResponse(StudentEntity entity) {
         return new StudentResponse(
             entity.getId(),
@@ -113,7 +127,8 @@ public class StudentApplicationService {
             entity.getName(),
             entity.getEmail(),
             entity.getDepartmentId(),
-            entity.getCreatedAt()
+            entity.getCreatedAt(),
+            entity.isActive()
         );
     }
 }

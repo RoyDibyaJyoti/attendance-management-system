@@ -56,10 +56,11 @@ public class StudentController {
     @Operation(summary = "List students with pagination")
     public ResponseEntity<PagedResponse<StudentResponse>> listStudents(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "20") int size
+        @RequestParam(defaultValue = "20") int size,
+        @RequestParam(defaultValue = "false") boolean includeInactive
     ) {
         int boundedSize = Math.min(Math.max(size, 1), 100);
-        return ResponseEntity.ok(studentService.listStudents(page, boundedSize));
+        return ResponseEntity.ok(studentService.listStudents(page, boundedSize, includeInactive));
     }
 
     @PatchMapping("/{id}")
@@ -69,5 +70,17 @@ public class StudentController {
         @Valid @RequestBody UpdateStudentRequest request
     ) {
         return ResponseEntity.ok(studentService.updateStudent(id, request));
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    @Operation(summary = "Deactivate a student")
+    public ResponseEntity<StudentResponse> deactivateStudent(@PathVariable UUID id) {
+        return ResponseEntity.ok(studentService.setStudentActiveStatus(id, false));
+    }
+
+    @PatchMapping("/{id}/reactivate")
+    @Operation(summary = "Reactivate a student")
+    public ResponseEntity<StudentResponse> reactivateStudent(@PathVariable UUID id) {
+        return ResponseEntity.ok(studentService.setStudentActiveStatus(id, true));
     }
 }

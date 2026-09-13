@@ -38,4 +38,11 @@ public class DepartmentPersistenceAdapter implements DepartmentRepositoryPort {
     public List<DepartmentEntity> findAll() {
         return repository.findAll();
     }
+
+    @Override
+    public List<DepartmentEntity> findByIsActive(boolean isActive) {
+        return repository.findAll().stream()
+            .filter(d -> d.isActive() == isActive)
+            .toList();
+    }
 }

@@ -112,7 +112,7 @@ class DomainCalculationPersistenceIntegrationTest extends PostgresIntegrationTes
         // 3. Setup Subject and Policy
         UUID subjectId = UUID.randomUUID();
         Subject subject = new Subject(
-            subjectId, "Discrete Mathematics", "CS201_" + UUID.randomUUID().toString().substring(0, 6), CourseType.THEORY, 4);
+            subjectId, "Discrete Mathematics", "CS201_" + UUID.randomUUID().toString().substring(0, 6), CourseType.THEORY, 4, true);
         subjectAdapter.save(subject, dept.getId());
 
         UUID policyId = UUID.randomUUID();

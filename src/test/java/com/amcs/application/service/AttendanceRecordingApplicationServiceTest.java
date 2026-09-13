@@ -87,7 +87,7 @@ class AttendanceRecordingApplicationServiceTest {
         );
 
         testSubject = new Subject(
-            subjectId, "Data Structures", "CS201", CourseType.THEORY, 3);
+            subjectId, "Data Structures", "CS201", CourseType.THEORY, 3, true);
     }
 
     @Nested
@@ -108,7 +108,7 @@ class AttendanceRecordingApplicationServiceTest {
             when(sessionPort.findById(sessionId)).thenReturn(Optional.of(scheduledSession));
             when(enrollmentPort.findActiveEnrollment(student1Id, sectionId)).thenReturn(Optional.of(e1));
             when(enrollmentPort.findActiveEnrollment(student2Id, sectionId)).thenReturn(Optional.of(e2));
-            when(subjectPort.findById(subjectId)).thenReturn(Optional.of(testSubject));
+            when(subjectPort.findById(subjectId)).thenReturn(Optional.of(new Subject(subjectId, "Math", "MATH101", CourseType.THEORY, 4, true)));
             when(recordPort.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
 
             SessionAttendanceSummaryResponse response = service.recordAttendance(sessionId, request);

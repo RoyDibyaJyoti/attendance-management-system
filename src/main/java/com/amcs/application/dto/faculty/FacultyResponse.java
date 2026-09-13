@@ -7,5 +7,6 @@ public record FacultyResponse(
     String employeeId,
     String name,
     String email,
-    UUID departmentId
+    UUID departmentId,
+    boolean isActive
 ) {}

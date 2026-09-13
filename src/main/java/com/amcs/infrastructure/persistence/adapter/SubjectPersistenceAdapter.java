@@ -44,4 +44,23 @@ public class SubjectPersistenceAdapter implements SubjectRepositoryPort {
     public List<Subject> findAll() {
         return repository.findAll().stream().map(mapper::toDomain).toList();
     }
+
+    @Override
+    public Subject update(Subject subject) {
+        SubjectEntity entity = repository.findById(subject.id())
+            .orElseThrow(() -> new IllegalArgumentException("Subject not found"));
+        entity.setName(subject.name());
+        entity.setCourseType(subject.courseType().name());
+        entity.setCreditHours(subject.creditHours());
+        entity.setActive(subject.isActive());
+        return mapper.toDomain(repository.save(entity));
+    }
+
+    @Override
+    public Subject setActiveStatus(UUID id, boolean isActive) {
+        SubjectEntity entity = repository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Subject not found"));
+        entity.setActive(isActive);
+        return mapper.toDomain(repository.save(entity));
+    }
 }

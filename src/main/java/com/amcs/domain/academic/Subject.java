@@ -18,7 +18,8 @@ public record Subject(
     String name,
     String code,
     CourseType courseType,
-    int creditHours
+    int creditHours,
+    boolean isActive
 ) {
     public Subject {
         Objects.requireNonNull(id, "id must not be null");

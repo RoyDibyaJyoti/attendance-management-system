@@ -13,4 +13,6 @@ public interface SubjectRepositoryPort {
     Optional<Subject> findById(UUID id);
     Optional<Subject> findByCode(String code);
     List<Subject> findAll();
+    Subject update(Subject subject);
+    Subject setActiveStatus(UUID id, boolean isActive);
 }

@@ -33,6 +33,9 @@ public class FacultyEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt = Instant.now();
 
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
+
     public FacultyEntity() {}
 
     public FacultyEntity(UUID id, String employeeId, String name, String email, UUID departmentId) {
@@ -43,6 +46,7 @@ public class FacultyEntity {
         this.departmentId = departmentId;
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
+        this.isActive = true;
     }
 
     public UUID getId() { return id; }
@@ -59,4 +63,6 @@ public class FacultyEntity {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public boolean isActive() { return isActive; }
+    public void setActive(boolean active) { isActive = active; }
 }

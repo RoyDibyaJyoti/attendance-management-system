@@ -7,5 +7,6 @@ public record SubjectResponse(
     String code,
     String name,
     String courseType,
-    int creditHours
+    int creditHours,
+    boolean isActive
 ) {}

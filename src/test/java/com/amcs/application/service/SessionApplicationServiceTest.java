@@ -67,7 +67,7 @@ class SessionApplicationServiceTest {
         CreateSessionRequest request = new CreateSessionRequest(
             subjectId, sectionId, facultyId, periodId, today, "THEORY", 2, null);
 
-        when(subjectPort.findById(subjectId)).thenReturn(Optional.of(new Subject(subjectId, "Math", "MATH101", CourseType.THEORY, 4)));
+        when(subjectPort.findById(subjectId)).thenReturn(Optional.of(new Subject(subjectId, "Math", "MATH101", CourseType.THEORY, 4, true)));
         when(sectionPort.findById(sectionId)).thenReturn(Optional.of(new SectionEntity(sectionId, "Sec A", UUID.randomUUID(), periodId)));
         when(facultyPort.findById(facultyId)).thenReturn(Optional.of(new FacultyEntity(facultyId, "FAC01", "Dr Smith", "smith@univ.edu", UUID.randomUUID())));
         when(periodPort.findById(periodId)).thenReturn(Optional.of(new AcademicPeriod("Fall 2026", today, today.plusMonths(4))));

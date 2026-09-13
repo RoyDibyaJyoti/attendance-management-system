@@ -18,6 +18,7 @@ export const AdminStudentsPage: React.FC = () => {
   const [students, setStudents] = useState<StudentResponse[]>([]);
   const [departments, setDepartments] = useState<DepartmentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [includeInactive, setIncludeInactive] = useState(false);
 
   // Pagination
   const [page, setPage] = useState(0);
@@ -34,7 +35,7 @@ export const AdminStudentsPage: React.FC = () => {
   const loadStudents = async (p: number = 0) => {
     try {
       const [res, depts] = await Promise.all([
-        studentApi.getStudents(p, 10),
+        studentApi.getStudents(p, 10, includeInactive),
         academicApi.getDepartments(),
       ]);
       setStudents(res.content);
@@ -51,7 +52,22 @@ export const AdminStudentsPage: React.FC = () => {
 
   useEffect(() => {
     loadStudents(0);
-  }, []);
+  }, [includeInactive]);
+
+  const toggleStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      if (currentStatus) {
+        await studentApi.deactivateStudent(id);
+        showToast('Student deactivated', 'success');
+      } else {
+        await studentApi.reactivateStudent(id);
+        showToast('Student reactivated', 'success');
+      }
+      loadStudents(page);
+    } catch (err) {
+      showToast('Failed to change status', 'error');
+    }
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,9 +111,20 @@ export const AdminStudentsPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-slate-900">Student Directory</h1>
           <p className="text-sm text-slate-500 mt-0.5">Enrolled learners, registration numbers, and institutional contact information</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} leftIcon={<Plus className="w-4 h-4" />}>
-          Register Student
-        </Button>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
+              checked={includeInactive}
+              onChange={(e) => setIncludeInactive(e.target.checked)}
+            />
+            Include Inactive
+          </label>
+          <Button onClick={() => setIsModalOpen(true)} leftIcon={<Plus className="w-4 h-4" />}>
+            Register Student
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -108,13 +135,16 @@ export const AdminStudentsPage: React.FC = () => {
             return (
               <div key={student.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0">
+                  <div className={`w-10 h-10 rounded-full font-bold text-xs flex items-center justify-center shrink-0 ${student.isActive === false ? 'bg-slate-100 text-slate-400' : 'bg-indigo-50 text-indigo-700'}`}>
                     {student.name.substring(0, 2).toUpperCase()}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="text-base font-bold text-slate-900">{student.name}</h4>
-                      <span className="font-mono text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                      <h4 className={`text-base font-bold ${student.isActive === false ? 'text-slate-500' : 'text-slate-900'}`}>{student.name}</h4>
+                      {student.isActive === false && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-wider">Inactive</span>
+                      )}
+                      <span className={`font-mono text-xs font-semibold px-2 py-0.5 rounded border ${student.isActive === false ? 'text-slate-500 bg-slate-50 border-slate-200' : 'text-indigo-700 bg-indigo-50 border-indigo-100'}`}>
                         {student.registrationNumber}
                       </span>
                     </div>
@@ -126,6 +156,15 @@ export const AdminStudentsPage: React.FC = () => {
                       <span>Department: <strong className="text-slate-700">{dept?.name || 'CSE'}</strong></span>
                     </div>
                   </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    onClick={() => toggleStatus(student.id, student.isActive !== false)}
+                  >
+                    {student.isActive === false ? 'Reactivate' : 'Deactivate'}
+                  </Button>
                 </div>
               </div>
             );

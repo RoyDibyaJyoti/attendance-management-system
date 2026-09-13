@@ -86,7 +86,7 @@ class SessionRowValidatorTest {
     void shouldValidateCleanSessionRow() {
         ParsedRow row = createRow("CS101", "A", "FAC001", "2026-09-15", "THEORY", "1");
 
-        Subject subject = new Subject(subjectId, "Computer Science", "CS101", com.amcs.domain.academic.CourseType.THEORY, 3);
+        Subject subject = new Subject(subjectId, "Computer Science", "CS101", com.amcs.domain.academic.CourseType.THEORY, 3, true);
         SectionEntity section = new SectionEntity(sectionId, "A", UUID.randomUUID(), periodId);
         AcademicPeriod period = new AcademicPeriod("Fall 2026", LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 31));
         FacultyEntity faculty = new FacultyEntity(facultyId, "FAC001", "Dr. Smith", "smith@univ.edu", UUID.randomUUID());
@@ -111,7 +111,7 @@ class SessionRowValidatorTest {
     void shouldRejectDateOutsidePeriod() {
         ParsedRow row = createRow("CS101", "A", "FAC001", "2026-08-01", "THEORY", "1"); // Before Sept 1
 
-        Subject subject = new Subject(subjectId, "Computer Science", "CS101", com.amcs.domain.academic.CourseType.THEORY, 3);
+        Subject subject = new Subject(subjectId, "Computer Science", "CS101", com.amcs.domain.academic.CourseType.THEORY, 3, true);
         SectionEntity section = new SectionEntity(sectionId, "A", UUID.randomUUID(), periodId);
         AcademicPeriod period = new AcademicPeriod("Fall 2026", LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 31));
         FacultyEntity faculty = new FacultyEntity(facultyId, "FAC001", "Dr. Smith", "smith@univ.edu", UUID.randomUUID());

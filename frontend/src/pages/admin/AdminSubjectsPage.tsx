@@ -17,6 +17,7 @@ export const AdminSubjectsPage: React.FC = () => {
   const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
   const [departments, setDepartments] = useState<DepartmentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [includeInactive, setIncludeInactive] = useState(false);
 
   // Pagination
   const [page, setPage] = useState(0);
@@ -34,7 +35,7 @@ export const AdminSubjectsPage: React.FC = () => {
   const loadSubjects = async (p: number = 0) => {
     try {
       const [res, depts] = await Promise.all([
-        academicApi.getSubjects(p, 10),
+        academicApi.getSubjects(p, 10, includeInactive),
         academicApi.getDepartments(),
       ]);
       setSubjects(res.content);
@@ -51,7 +52,22 @@ export const AdminSubjectsPage: React.FC = () => {
 
   useEffect(() => {
     loadSubjects(0);
-  }, []);
+  }, [includeInactive]);
+
+  const toggleStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      if (currentStatus) {
+        await academicApi.deactivateSubject(id);
+        showToast('Subject deactivated', 'success');
+      } else {
+        await academicApi.reactivateSubject(id);
+        showToast('Subject reactivated', 'success');
+      }
+      loadSubjects(page);
+    } catch (err) {
+      showToast('Failed to change status', 'error');
+    }
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,9 +109,20 @@ export const AdminSubjectsPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-slate-900">Curriculum Subjects</h1>
           <p className="text-sm text-slate-500 mt-0.5">Theory, Laboratory, and Integrated courses registered in syllabus</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} leftIcon={<Plus className="w-4 h-4" />}>
-          Add Subject
-        </Button>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
+              checked={includeInactive}
+              onChange={(e) => setIncludeInactive(e.target.checked)}
+            />
+            Include Inactive
+          </label>
+          <Button onClick={() => setIsModalOpen(true)} leftIcon={<Plus className="w-4 h-4" />}>
+            Add Subject
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -103,15 +130,18 @@ export const AdminSubjectsPage: React.FC = () => {
           {subjects.map((sub) => (
             <div key={sub.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
               <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${sub.isActive === false ? 'bg-slate-100 text-slate-400' : 'bg-indigo-50 text-indigo-600'}`}>
                   <BookOpen className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                    <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded border ${sub.isActive === false ? 'text-slate-500 bg-slate-50 border-slate-200' : 'text-indigo-700 bg-indigo-50 border-indigo-100'}`}>
                       {sub.code}
                     </span>
-                    <h4 className="text-base font-bold text-slate-900">{sub.name}</h4>
+                    <h4 className={`text-base font-bold ${sub.isActive === false ? 'text-slate-500' : 'text-slate-900'}`}>{sub.name}</h4>
+                    {sub.isActive === false && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-wider">Inactive</span>
+                    )}
                   </div>
                   <p className="text-xs text-slate-500 mt-1">
                     Stream: <span className="font-semibold text-slate-700">{sub.courseType}</span> |{' '}
@@ -120,12 +150,21 @@ export const AdminSubjectsPage: React.FC = () => {
                 </div>
               </div>
 
-              <Badge
-                variant={sub.courseType === 'THEORY' ? 'neutral' : 'purple'}
-                size="sm"
-              >
-                {sub.courseType}
-              </Badge>
+              <div className="flex items-center gap-3">
+                <Badge
+                  variant={sub.courseType === 'THEORY' ? 'neutral' : 'purple'}
+                  size="sm"
+                >
+                  {sub.courseType}
+                </Badge>
+                <Button 
+                  variant="secondary" 
+                  size="sm"
+                  onClick={() => toggleStatus(sub.id, sub.isActive !== false)}
+                >
+                  {sub.isActive === false ? 'Reactivate' : 'Deactivate'}
+                </Button>
+              </div>
             </div>
           ))}
         </div>

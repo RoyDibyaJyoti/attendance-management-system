@@ -7,21 +7,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(
-    name = "faculty_assignments",
-    uniqueConstraints = {
-        @UniqueConstraint(
-            name = "uq_faculty_subject_section",
-            columnNames = {"faculty_id", "subject_id", "section_id", "academic_period_id"}
-        )
-    }
-)
+@Table(name = "faculty_section_assignments")
 public class FacultyAssignmentEntity {
 
     @Id
@@ -44,11 +35,20 @@ public class FacultyAssignmentEntity {
     @JoinColumn(name = "academic_period_id", nullable = false)
     private AcademicPeriodEntity academicPeriod;
 
-    @Column(name = "is_primary", nullable = false)
-    private boolean isPrimary = true;
+    @Column(name = "assignment_start", nullable = false)
+    private LocalDate assignmentStart;
+
+    @Column(name = "assignment_end")
+    private LocalDate assignmentEnd;
+
+    @Column(name = "status", nullable = false, length = 30)
+    private String status = "ACTIVE";
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt = Instant.now();
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt = Instant.now();
 
     public FacultyAssignmentEntity() {}
 
@@ -58,15 +58,20 @@ public class FacultyAssignmentEntity {
         SubjectEntity subject,
         SectionEntity section,
         AcademicPeriodEntity academicPeriod,
-        boolean isPrimary
+        LocalDate assignmentStart,
+        LocalDate assignmentEnd,
+        String status
     ) {
         this.id = id;
         this.faculty = faculty;
         this.subject = subject;
         this.section = section;
         this.academicPeriod = academicPeriod;
-        this.isPrimary = isPrimary;
+        this.assignmentStart = assignmentStart;
+        this.assignmentEnd = assignmentEnd;
+        this.status = status;
         this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
     }
 
     public UUID getId() { return id; }
@@ -79,24 +84,23 @@ public class FacultyAssignmentEntity {
     public void setSection(SectionEntity section) { this.section = section; }
     public AcademicPeriodEntity getAcademicPeriod() { return academicPeriod; }
     public void setAcademicPeriod(AcademicPeriodEntity academicPeriod) { this.academicPeriod = academicPeriod; }
-    public boolean isPrimary() { return isPrimary; }
-    public void setPrimary(boolean primary) { isPrimary = primary; }
+    
+    public LocalDate getAssignmentStart() { return assignmentStart; }
+    public void setAssignmentStart(LocalDate assignmentStart) { this.assignmentStart = assignmentStart; }
+    
+    public LocalDate getAssignmentEnd() { return assignmentEnd; }
+    public void setAssignmentEnd(LocalDate assignmentEnd) { this.assignmentEnd = assignmentEnd; }
+    
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 
-    public UUID getFacultyId() {
-        return faculty != null ? faculty.getId() : null;
-    }
-
-    public UUID getSubjectId() {
-        return subject != null ? subject.getId() : null;
-    }
-
-    public UUID getSectionId() {
-        return section != null ? section.getId() : null;
-    }
-
-    public UUID getAcademicPeriodId() {
-        return academicPeriod != null ? academicPeriod.getId() : null;
-    }
+    public UUID getFacultyId() { return faculty != null ? faculty.getId() : null; }
+    public UUID getSubjectId() { return subject != null ? subject.getId() : null; }
+    public UUID getSectionId() { return section != null ? section.getId() : null; }
+    public UUID getAcademicPeriodId() { return academicPeriod != null ? academicPeriod.getId() : null; }
 }

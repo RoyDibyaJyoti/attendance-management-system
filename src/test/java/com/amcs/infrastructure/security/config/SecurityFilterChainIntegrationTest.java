@@ -14,6 +14,9 @@ import com.amcs.infrastructure.security.jwt.JwtTokenProvider;
 import com.amcs.infrastructure.web.controller.StudentController;
 import com.amcs.infrastructure.web.error.GlobalRestExceptionHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.amcs.application.dto.common.PagedResponse;
+import com.amcs.application.dto.student.StudentResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -117,8 +120,8 @@ class SecurityFilterChainIntegrationTest {
             Instant.now(), Instant.now()
         );
         when(userAccountRepositoryPort.findById(userId)).thenReturn(Optional.of(account));
-        when(studentService.listStudents(anyInt(), anyInt()))
-            .thenReturn(com.amcs.application.dto.common.PagedResponse.of(List.of(), 0, 20));
+        when(studentService.listStudents(0, 20, false)).thenReturn(PagedResponse.of(
+            List.of(new StudentResponse(studentId, "REG001", "Student One", "student@univ.edu", UUID.randomUUID(), Instant.now(), true)), 0, 20));
 
         mockMvc.perform(get("/api/v1/students")
                 .header("Authorization", "Bearer " + token)

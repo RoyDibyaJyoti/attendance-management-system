@@ -17,6 +17,7 @@ export const AdminSectionsPage: React.FC = () => {
   const [departments, setDepartments] = useState<DepartmentResponse[]>([]);
   const [periods, setPeriods] = useState<AcademicPeriodResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [includeInactive, setIncludeInactive] = useState(false);
 
   // Create Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,7 +47,22 @@ export const AdminSectionsPage: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [includeInactive]);
+
+  const toggleStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      if (currentStatus) {
+        await academicApi.deactivateSection(id);
+        showToast('Section deactivated', 'success');
+      } else {
+        await academicApi.reactivateSection(id);
+        showToast('Section reactivated', 'success');
+      }
+      loadData();
+    } catch (err) {
+      showToast('Failed to change status', 'error');
+    }
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,9 +104,20 @@ export const AdminSectionsPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-slate-900">Class Sections</h1>
           <p className="text-sm text-slate-500 mt-0.5">Cohort groupings for students, timetables, and roll-calls</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} leftIcon={<Plus className="w-4 h-4" />}>
-          Add Section
-        </Button>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
+              checked={includeInactive}
+              onChange={(e) => setIncludeInactive(e.target.checked)}
+            />
+            Include Inactive
+          </label>
+          <Button onClick={() => setIsModalOpen(true)} leftIcon={<Plus className="w-4 h-4" />}>
+            Add Section
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -102,16 +129,30 @@ export const AdminSectionsPage: React.FC = () => {
             return (
               <div key={section.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${section.isActive === false ? 'bg-slate-100 text-slate-400' : 'bg-emerald-50 text-emerald-600'}`}>
                     <Award className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-base font-bold text-slate-900">{section.name}</h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className={`text-base font-bold ${section.isActive === false ? 'text-slate-500' : 'text-slate-900'}`}>{section.name}</h4>
+                      {section.isActive === false && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-wider">Inactive</span>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-500 mt-0.5">
                       Department: <span className="font-semibold text-slate-700">{dept?.name || 'CSE'}</span> |{' '}
                       Semester: <span className="font-semibold text-slate-700">{period?.name || 'Fall 2026'}</span>
                     </p>
                   </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    onClick={() => toggleStatus(section.id, section.isActive !== false)}
+                  >
+                    {section.isActive === false ? 'Reactivate' : 'Deactivate'}
+                  </Button>
                 </div>
               </div>
             );

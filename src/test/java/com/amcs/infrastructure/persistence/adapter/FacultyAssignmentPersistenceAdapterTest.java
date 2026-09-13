@@ -58,7 +58,7 @@ class FacultyAssignmentPersistenceAdapterTest {
     @DisplayName("Should save faculty teaching assignment")
     void shouldSaveAssignment() {
         FacultyAssignment assignment = new FacultyAssignment(
-            assignmentId, facultyId, subjectId, sectionId, periodId, true, Instant.now());
+            assignmentId, facultyId, subjectId, sectionId, periodId, LocalDate.now(), null, "ACTIVE", Instant.now());
 
         FacultyEntity faculty = new FacultyEntity(facultyId, "EMP01", "Prof Jones", "jones@univ.edu", UUID.randomUUID());
         SubjectEntity subject = new SubjectEntity(subjectId, "CS101", "Intro CS", "THEORY", 3, UUID.randomUUID());
@@ -77,22 +77,22 @@ class FacultyAssignmentPersistenceAdapterTest {
         assertThat(saved.id()).isEqualTo(assignmentId);
         assertThat(saved.facultyId()).isEqualTo(facultyId);
         assertThat(saved.subjectId()).isEqualTo(subjectId);
-        assertThat(saved.isPrimary()).isTrue();
+        assertThat(saved.status()).isEqualTo("ACTIVE");
     }
 
     @Test
     @DisplayName("Should verify faculty assignment scope via isFacultyAssigned")
     void shouldVerifyFacultyAssignmentScope() {
-        when(assignmentRepository.isFacultyAssigned(facultyId, subjectId, sectionId, periodId))
+        when(assignmentRepository.isFacultyAssigned(facultyId, subjectId, sectionId, periodId, LocalDate.now()))
             .thenReturn(true);
 
-        boolean assigned = adapter.isFacultyAssigned(facultyId, subjectId, sectionId, periodId);
+        boolean assigned = adapter.isFacultyAssigned(facultyId, subjectId, sectionId, periodId, LocalDate.now());
         assertThat(assigned).isTrue();
 
-        when(assignmentRepository.isFacultyAssigned(facultyId, subjectId, sectionId, periodId))
+        when(assignmentRepository.isFacultyAssigned(facultyId, subjectId, sectionId, periodId, LocalDate.now()))
             .thenReturn(false);
 
-        boolean notAssigned = adapter.isFacultyAssigned(facultyId, subjectId, sectionId, periodId);
+        boolean notAssigned = adapter.isFacultyAssigned(facultyId, subjectId, sectionId, periodId, LocalDate.now());
         assertThat(notAssigned).isFalse();
     }
 
@@ -105,7 +105,7 @@ class FacultyAssignmentPersistenceAdapterTest {
         AcademicPeriodEntity period = new AcademicPeriodEntity(periodId, "Fall 2026", LocalDate.now(), LocalDate.now().plusMonths(4));
 
         FacultyAssignmentEntity entity = new FacultyAssignmentEntity(
-            assignmentId, faculty, subject, section, period, true);
+            assignmentId, faculty, subject, section, period, LocalDate.now(), null, "ACTIVE");
 
         when(assignmentRepository.findByFacultyId(facultyId)).thenReturn(List.of(entity));
 

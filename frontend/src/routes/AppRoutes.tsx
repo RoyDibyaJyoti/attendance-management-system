@@ -35,6 +35,7 @@ import { AdminEnrollmentsPage } from '../pages/admin/AdminEnrollmentsPage';
 import { AdminSessionsPage } from '../pages/admin/AdminSessionsPage';
 import { AdminReportCenterPage } from '../pages/admin/AdminReportCenterPage';
 import { AdminImportCenterPage } from '../pages/admin/AdminImportCenterPage';
+import { AdminFacultyAssignmentsPage } from '../pages/admin/AdminFacultyAssignmentsPage';
 
 const RootRedirect: React.FC = () => {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -85,6 +86,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="/admin/subjects" element={<AdminSubjectsPage />} />
           <Route path="/admin/policies" element={<AdminPoliciesPage />} />
           <Route path="/admin/faculty" element={<AdminFacultyPage />} />
+          <Route path="/admin/faculty-assignments" element={<AdminFacultyAssignmentsPage />} />
           <Route path="/admin/students" element={<AdminStudentsPage />} />
           <Route path="/admin/enrollments" element={<AdminEnrollmentsPage />} />
           <Route path="/admin/sessions" element={<AdminSessionsPage />} />

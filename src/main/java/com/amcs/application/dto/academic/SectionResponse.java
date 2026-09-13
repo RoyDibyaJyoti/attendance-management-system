@@ -6,5 +6,6 @@ public record SectionResponse(
     UUID id,
     String name,
     UUID departmentId,
-    UUID academicPeriodId
+    UUID academicPeriodId,
+    boolean isActive
 ) {}

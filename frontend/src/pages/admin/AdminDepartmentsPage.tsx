@@ -14,6 +14,7 @@ export const AdminDepartmentsPage: React.FC = () => {
   const { showToast } = useToast();
   const [departments, setDepartments] = useState<DepartmentResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [includeInactive, setIncludeInactive] = useState(false);
 
   // Create Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,7 +24,7 @@ export const AdminDepartmentsPage: React.FC = () => {
 
   const loadDepartments = async () => {
     try {
-      const data = await academicApi.getDepartments();
+      const data = await academicApi.getDepartments(includeInactive);
       setDepartments(data);
     } catch (err) {
       console.error('Failed to load departments:', err);
@@ -34,7 +35,22 @@ export const AdminDepartmentsPage: React.FC = () => {
 
   useEffect(() => {
     loadDepartments();
-  }, []);
+  }, [includeInactive]);
+
+  const toggleStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      if (currentStatus) {
+        await academicApi.deactivateDepartment(id);
+        showToast('Department deactivated', 'success');
+      } else {
+        await academicApi.reactivateDepartment(id);
+        showToast('Department reactivate', 'success');
+      }
+      loadDepartments();
+    } catch (err) {
+      showToast('Failed to change status', 'error');
+    }
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,9 +86,20 @@ export const AdminDepartmentsPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-slate-900">Academic Departments</h1>
           <p className="text-sm text-slate-500 mt-0.5">Manage institutional faculties and departmental units</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)} leftIcon={<Plus className="w-4 h-4" />}>
-          Add Department
-        </Button>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
+              checked={includeInactive}
+              onChange={(e) => setIncludeInactive(e.target.checked)}
+            />
+            Include Inactive
+          </label>
+          <Button onClick={() => setIsModalOpen(true)} leftIcon={<Plus className="w-4 h-4" />}>
+            Add Department
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -80,15 +107,29 @@ export const AdminDepartmentsPage: React.FC = () => {
           {departments.map((dept) => (
             <div key={dept.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 font-bold text-xs flex items-center justify-center">
+                <div className={`w-10 h-10 rounded-xl font-bold text-xs flex items-center justify-center ${dept.isActive === false ? 'bg-slate-100 text-slate-400' : 'bg-indigo-50 text-indigo-600'}`}>
                   <Layers className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900">{dept.name}</h4>
-                  <span className="text-xs font-mono font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                  <div className="flex items-center gap-2">
+                    <h4 className={`text-sm font-bold ${dept.isActive === false ? 'text-slate-500' : 'text-slate-900'}`}>{dept.name}</h4>
+                    {dept.isActive === false && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-wider">Inactive</span>
+                    )}
+                  </div>
+                  <span className={`text-xs font-mono font-semibold px-2 py-0.5 rounded ${dept.isActive === false ? 'text-slate-400 bg-slate-50' : 'text-indigo-600 bg-indigo-50'}`}>
                     {dept.code}
                   </span>
                 </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="secondary" 
+                  size="sm"
+                  onClick={() => toggleStatus(dept.id, dept.isActive !== false)}
+                >
+                  {dept.isActive === false ? 'Reactivate' : 'Deactivate'}
+                </Button>
               </div>
             </div>
           ))}

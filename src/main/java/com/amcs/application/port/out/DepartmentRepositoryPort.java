@@ -10,4 +10,5 @@ public interface DepartmentRepositoryPort {
     Optional<DepartmentEntity> findById(UUID id);
     Optional<DepartmentEntity> findByCode(String code);
     List<DepartmentEntity> findAll();
+    List<DepartmentEntity> findByIsActive(boolean isActive);
 }

@@ -76,6 +76,7 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -281,7 +282,9 @@ class ComprehensiveSecurityAndRbacTest {
             mockUserAccount(userFacultyAId, "facultyA", UserRole.FACULTY, Optional.empty(), Optional.of(facultyAId), 1);
 
             // Faculty A is assigned to Subject 1 / Section 1, NOT Subject 2 / Section 2
-            when(facultyAssignmentPort.isFacultyAssigned(facultyAId, subject2Id, section2Id, periodId)).thenReturn(false);
+            when(facultyAssignmentPort.isFacultyAssigned(
+                eq(facultyAId), eq(subject2Id), eq(section2Id), eq(periodId), any(LocalDate.class)
+            )).thenReturn(false);
 
             CreateSessionRequest request = new CreateSessionRequest(
                 subject2Id, section2Id, facultyAId, periodId, LocalDate.of(2026, 9, 20), "THEORY", 1, null

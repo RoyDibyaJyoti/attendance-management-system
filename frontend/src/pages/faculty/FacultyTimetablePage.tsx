@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { academicApi } from '../../api/academicApi';
 import { sessionApi } from '../../api/sessionApi';
+import { facultyAssignmentApi } from '../../api/facultyAssignmentApi';
 import { useToast } from '../../context/ToastContext';
 import { SessionResponse, CreateSessionRequest } from '../../types/session';
 import { SectionResponse, SubjectResponse, AcademicPeriodResponse } from '../../types/academic';
@@ -72,14 +73,28 @@ export const FacultyTimetablePage: React.FC = () => {
     async function init() {
       setIsLoading(true);
       try {
-        const [secs, subs, pers] = await Promise.all([
-          academicApi.getAllSections(),
-          academicApi.getAllSubjects(),
+        if (!facultyId) return;
+
+        const [assnRes, pers] = await Promise.all([
+          facultyAssignmentApi.getAssignments(facultyId, undefined, 0, 100),
           academicApi.getPeriods(),
         ]);
+        
+        const activeAssignments = assnRes.content.filter(a => a.status === 'ACTIVE');
+        setPeriods(pers);
+
+        // Extract unique section and subject IDs
+        const uniqueSectionIds = Array.from(new Set(activeAssignments.map(a => a.sectionId)));
+        const uniqueSubjectIds = Array.from(new Set(activeAssignments.map(a => a.subjectId)));
+
+        // Fetch details for these specific entities
+        const [secs, subs] = await Promise.all([
+          Promise.all(uniqueSectionIds.map(id => academicApi.getSectionById(id))),
+          Promise.all(uniqueSubjectIds.map(id => academicApi.getSubjectById(id))),
+        ]);
+
         setSections(secs);
         setSubjects(subs);
-        setPeriods(pers);
 
         if (secs.length > 0) {
           setSelectedSectionId(secs[0].id);
@@ -93,7 +108,7 @@ export const FacultyTimetablePage: React.FC = () => {
       }
     }
     init();
-  }, []);
+  }, [facultyId]);
 
   const handleSectionChange = (newSecId: string) => {
     setSelectedSectionId(newSecId);

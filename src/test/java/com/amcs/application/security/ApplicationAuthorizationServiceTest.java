@@ -25,6 +25,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -145,8 +147,9 @@ class ApplicationAuthorizationServiceTest {
         @DisplayName("6. Assigned faculty can perform authorized teaching operation (subject read)")
         void shouldAllowAssignedFacultyToReadSubjectAttendance() {
             when(currentUserPort.requireCurrentActor()).thenReturn(facultyActor(facultyAId));
-            when(facultyAssignmentPort.isFacultyAssigned(facultyAId, subjectId, sectionId, periodId))
-                .thenReturn(true);
+            when(facultyAssignmentPort.isFacultyAssigned(
+                eq(facultyAId), eq(subjectId), eq(sectionId), eq(periodId), any(LocalDate.class)
+            )).thenReturn(true);
 
             assertThatCode(() -> authorizationService.requireSubjectAttendanceReadAccess(
                 studentAId, subjectId, sectionId, periodId
@@ -157,8 +160,9 @@ class ApplicationAuthorizationServiceTest {
         @DisplayName("7. Unassigned faculty cannot perform that operation (403 ACCESS_DENIED)")
         void shouldDenyUnassignedFacultyFromReadingSubjectAttendance() {
             when(currentUserPort.requireCurrentActor()).thenReturn(facultyActor(facultyAId));
-            when(facultyAssignmentPort.isFacultyAssigned(facultyAId, subjectId, sectionId, periodId))
-                .thenReturn(false);
+            when(facultyAssignmentPort.isFacultyAssigned(
+                eq(facultyAId), eq(subjectId), eq(sectionId), eq(periodId), any(LocalDate.class)
+            )).thenReturn(false);
 
             assertThatThrownBy(() -> authorizationService.requireSubjectAttendanceReadAccess(
                 studentAId, subjectId, sectionId, periodId
@@ -250,7 +254,7 @@ class ApplicationAuthorizationServiceTest {
             Session session = createSession(facultyAId);
 
             FacultyAssignment assignment = new FacultyAssignment(
-                UUID.randomUUID(), facultyBId, subjectId, sectionId, periodId, true, Instant.now()
+                UUID.randomUUID(), facultyBId, subjectId, sectionId, periodId, LocalDate.now(), null, "ACTIVE", Instant.now()
             );
             when(facultyAssignmentPort.findByFacultyId(facultyBId)).thenReturn(List.of(assignment));
 

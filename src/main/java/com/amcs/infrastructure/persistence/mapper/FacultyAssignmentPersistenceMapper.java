@@ -19,7 +19,9 @@ public class FacultyAssignmentPersistenceMapper {
             entity.getSubjectId(),
             entity.getSectionId(),
             entity.getAcademicPeriodId(),
-            entity.isPrimary(),
+            entity.getAssignmentStart(),
+            entity.getAssignmentEnd(),
+            entity.getStatus(),
             entity.getCreatedAt()
         );
     }
@@ -38,7 +40,9 @@ public class FacultyAssignmentPersistenceMapper {
             subject,
             section,
             period,
-            domain.isPrimary()
+            domain.assignmentStart(),
+            domain.assignmentEnd(),
+            domain.status()
         );
     }
 }

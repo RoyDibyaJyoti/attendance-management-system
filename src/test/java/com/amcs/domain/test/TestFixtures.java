@@ -107,17 +107,17 @@ public final class TestFixtures {
 
     public static Subject theorySubject() {
         return new Subject(SUBJECT_THEORY, "Engineering Mathematics", "MA101",
-            CourseType.THEORY, 4);
+            CourseType.THEORY, 4, true);
     }
 
     public static Subject labSubject() {
         return new Subject(SUBJECT_LAB, "Physics Lab", "PH111L",
-            CourseType.LABORATORY, 1);
+            CourseType.LABORATORY, 1, true);
     }
 
     public static Subject integratedSubject() {
         return new Subject(SUBJECT_INTEGRATED, "Electronics with Lab", "EC201",
-            CourseType.THEORY_INTEGRATED_LABORATORY, 5);
+            CourseType.THEORY_INTEGRATED_LABORATORY, 5, true);
     }
 
     // ── SubjectComponent factories ───────────────────────────────────────────

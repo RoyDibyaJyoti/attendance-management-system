@@ -75,7 +75,13 @@ public class ApplicationAuthorizationService {
         if (actor.isFaculty()) {
             UUID facultyId = actor.facultyId()
                 .orElseThrow(() -> new AccessDeniedException("No faculty record linked to account"));
-            boolean assigned = facultyAssignmentPort.isFacultyAssigned(facultyId, subjectId, sectionId, academicPeriodId);
+            boolean assigned = facultyAssignmentPort.isFacultyAssigned(
+                facultyId,
+                subjectId,
+                sectionId,
+                academicPeriodId,
+                java.time.LocalDate.now()
+            );
             if (!assigned) {
                 throw new AccessDeniedException("Access denied: Faculty member is not assigned to this subject and section");
             }
@@ -105,7 +111,13 @@ public class ApplicationAuthorizationService {
                 throw new AccessDeniedException("Access denied: Faculty cannot create sessions on behalf of another faculty member");
             }
 
-            boolean assigned = facultyAssignmentPort.isFacultyAssigned(facultyId, subjectId, sectionId, academicPeriodId);
+            boolean assigned = facultyAssignmentPort.isFacultyAssigned(
+                facultyId,
+                subjectId,
+                sectionId,
+                academicPeriodId,
+                java.time.LocalDate.now()
+            );
             if (!assigned) {
                 throw new AccessDeniedException("Access denied: Faculty is not assigned to teach this subject and section");
             }
@@ -208,6 +220,25 @@ public class ApplicationAuthorizationService {
                 .orElseThrow(() -> new AccessDeniedException("No student record linked to account"));
             if (!studentId.equals(targetStudentId)) {
                 throw new AccessDeniedException("Access denied: Students may only view their own profile");
+            }
+            return;
+        }
+        throw new AccessDeniedException("Access denied: Insufficient privileges");
+    }
+
+    /**
+     * Enforces faculty profile read access.
+     */
+    public void requireFacultyProfileReadAccess(UUID targetFacultyId) {
+        AuthenticatedActor actor = currentUserPort.requireCurrentActor();
+        if (actor.isAdmin()) {
+            return;
+        }
+        if (actor.isFaculty()) {
+            UUID facultyId = actor.facultyId()
+                .orElseThrow(() -> new AccessDeniedException("No faculty record linked to account"));
+            if (!facultyId.equals(targetFacultyId)) {
+                throw new AccessDeniedException("Access denied: Faculty may only view their own assignments");
             }
             return;
         }
@@ -352,7 +383,9 @@ public class ApplicationAuthorizationService {
                 .orElseThrow(() -> new AccessDeniedException("No faculty record linked to account"));
 
             if (subjectId != null && sectionId != null && academicPeriodId != null) {
-                boolean assigned = facultyAssignmentPort.isFacultyAssigned(facultyId, subjectId, sectionId, academicPeriodId);
+                boolean assigned = facultyAssignmentPort.isFacultyAssigned(
+                    facultyId, subjectId, sectionId, academicPeriodId, java.time.LocalDate.now()
+                );
                 if (!assigned) {
                     throw new AccessDeniedException("Access denied: Faculty member is not assigned to this subject and section");
                 }

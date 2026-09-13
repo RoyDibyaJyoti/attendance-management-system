@@ -17,13 +17,14 @@ public class SubjectPersistenceMapper {
             entity.getName(),
             entity.getCode(),
             CourseType.valueOf(entity.getCourseType()),
-            entity.getCreditHours()
+            entity.getCreditHours(),
+            entity.isActive()
         );
     }
 
     public SubjectEntity toEntity(Subject domain, UUID departmentId) {
         if (domain == null) return null;
-        return new SubjectEntity(
+        SubjectEntity entity = new SubjectEntity(
             domain.id(),
             domain.code(),
             domain.name(),
@@ -31,5 +32,7 @@ public class SubjectPersistenceMapper {
             domain.creditHours(),
             departmentId
         );
+        entity.setActive(domain.isActive());
+        return entity;
     }
 }

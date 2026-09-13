@@ -4,6 +4,7 @@ export interface DepartmentResponse {
   id: string;
   code: string;
   name: string;
+  isActive?: boolean;
 }
 
 export interface CreateDepartmentRequest {
@@ -29,6 +30,7 @@ export interface SectionResponse {
   name: string;
   departmentId: string;
   academicPeriodId: string;
+  isActive?: boolean;
 }
 
 export interface CreateSectionRequest {
@@ -43,6 +45,7 @@ export interface SubjectResponse {
   name: string;
   courseType: CourseType;
   creditHours: number;
+  isActive?: boolean;
 }
 
 export interface CreateSubjectRequest {
