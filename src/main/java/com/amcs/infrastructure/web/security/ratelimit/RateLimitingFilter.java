@@ -128,6 +128,10 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     }
 
     private String extractClientKey(HttpServletRequest request) {
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isBlank()) {
+            return xRealIp.trim();
+        }
         String xForwardedFor = request.getHeader("X-Forwarded-For");
         if (xForwardedFor != null && !xForwardedFor.isBlank()) {
             return xForwardedFor.split(",")[0].trim();

@@ -1,4 +1,4 @@
-name: AMCS CI Pipeline
+name: AMCS Production CI Pipeline
 
 on:
   push:
@@ -7,10 +7,9 @@ on:
     branches: [ main ]
 
 jobs:
-  build-test-verify:
-    name: Build, Test & Security Verification
+  backend-test:
+    name: Backend Test & Verification (Java 21)
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -22,29 +21,77 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build & Run Full Test Suite (PostgreSQL Testcontainers)
-        run: mvn clean verify -B
+      - name: Run Full Backend Test Suite
+        run: mvn clean test -B
         env:
           AMCS_JWT_SECRET: "ci-testing-super-secret-jwt-key-minimum-256-bits-length-32-bytes!"
+
+  frontend-test:
+    name: Frontend Lint, Test & Build (Node 20)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run Frontend Linter (oxlint)
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Run Frontend Unit Tests (Vitest)
+        working-directory: frontend
+        run: npm test
+
+      - name: Run Frontend Production Build (TypeScript + Vite)
+        working-directory: frontend
+        run: npm run build
+
+  docker-build:
+    name: Container Image Build Verification
+    needs: [backend-test, frontend-test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Hardened Production Docker Image
+      - name: Build Backend Docker Image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
           push: false
-          tags: amcs:ci
+          tags: amcs-backend:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Verify Docker Container Runs as Non-Root User
+      - name: Verify Backend Runs as Non-Root User (UID 10001)
         run: |
-          USER_ID=$(docker run --rm amcs:ci id -u)
+          USER_ID=$(docker run --rm amcs-backend:ci id -u)
           if [ "$USER_ID" -ne 10001 ]; then
-            echo "FAILED: Container is running as UID $USER_ID, expected 10001 (non-root)"
+            echo "FAILED: Container runs as UID $USER_ID, expected 10001 (non-root)"
             exit 1
           fi
           echo "SUCCESS: Container runs strictly as UID 10001 (amcs)"
+
+      - name: Build Frontend/Nginx Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: false
+          tags: amcs-frontend:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

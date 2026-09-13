@@ -83,27 +83,27 @@ export const FacultyRollCallPage: React.FC = () => {
           });
           setRoster(conductedRoster);
         } else {
-          // Unconducted session: fetch enrolled students for this section only
-          const allStudents = await studentApi.getAllStudents();
-          const allEnrollments = await Promise.all(
-            allStudents.map((st) =>
-              enrollmentApi.getStudentEnrollments(st.id).catch(() => [])
-            )
-          );
-          // Filter to students with active enrollment in this section
-          const enrolledStudents = allStudents.filter((st, idx) => {
-            const enrs = allEnrollments[idx];
-            return enrs.some(
-              (e) => e.sectionId === sess.sectionId && e.status === 'ACTIVE'
-            );
-          });
+          // Unconducted session: fetch enrolled students for this section directly
+          const [sectionEnrollments, allStudents] = await Promise.all([
+            enrollmentApi.getSectionEnrollments(sess.sectionId),
+            studentApi.getAllStudents(),
+          ]);
+
+          const studentMap = new Map(allStudents.map((s) => [s.id, s]));
+          const activeEnrollments = sectionEnrollments.filter((e) => e.status === 'ACTIVE');
+
+          const enrolledStudents = activeEnrollments
+            .map((e) => studentMap.get(e.studentId))
+            .filter((s): s is StudentResponse => !!s);
+
           // If no section-specific enrollments found, fallback to all students
-          const rosterStudents = enrolledStudents.length > 0 ? enrolledStudents : allStudents;
-          const initialRoster: StudentRosterItem[] = rosterStudents.map((st) => ({
+          const studentList = enrolledStudents.length > 0 ? enrolledStudents : allStudents;
+
+          const initialRoster: StudentRosterItem[] = studentList.map((st) => ({
             studentId: st.id,
             name: st.name,
             registrationNumber: st.registrationNumber,
-            status: 'PRESENT', // default to PRESENT for fast roll call
+            status: 'PRESENT',
           }));
           setRoster(initialRoster);
         }

@@ -22,4 +22,9 @@ export const enrollmentApi = {
   getStudentEnrollments: (studentId: string): Promise<EnrollmentResponse[]> => {
     return apiClient<EnrollmentResponse[]>(`/enrollments/students/${studentId}`);
   },
+
+  // GET /api/v1/enrollments/sections/{sectionId}
+  getSectionEnrollments: (sectionId: string): Promise<EnrollmentResponse[]> => {
+    return apiClient<EnrollmentResponse[]>(`/enrollments/sections/${sectionId}`);
+  },
 };

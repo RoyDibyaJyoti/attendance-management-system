@@ -34,8 +34,20 @@ public class EnrollmentPersistenceAdapter implements EnrollmentRepositoryPort {
 
     @Override
     public Enrollment save(Enrollment enrollment) {
-        UUID id = UUID.randomUUID();
-        EnrollmentEntity entity = mapper.toEntity(id, enrollment, "ACTIVE");
+        Optional<EnrollmentEntity> existingActive = enrollmentRepository
+            .findActiveByStudentIdAndSectionId(enrollment.studentId(), enrollment.sectionId());
+
+        EnrollmentEntity entity;
+        if (existingActive.isPresent() && enrollment.enrollmentEnd().isPresent()) {
+            entity = existingActive.get();
+            entity.setEnrollmentEnd(enrollment.enrollmentEnd().get());
+            entity.setStatus("ENDED");
+            entity.setUpdatedAt(java.time.Instant.now());
+        } else {
+            UUID id = UUID.randomUUID();
+            String status = enrollment.enrollmentEnd().isPresent() ? "ENDED" : "ACTIVE";
+            entity = mapper.toEntity(id, enrollment, status);
+        }
         EnrollmentEntity saved = enrollmentRepository.save(entity);
 
         // If lab group is present, also persist a lab group membership

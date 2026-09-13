@@ -71,3 +71,5 @@ amcs:
       enabled: true
       auth-limit-per-minute: ${AMCS_RATE_LIMIT_AUTH:10}
       heavy-limit-per-minute: ${AMCS_RATE_LIMIT_HEAVY:25}
+    bootstrap:
+      enabled: ${AMCS_BOOTSTRAP_ENABLED:false}

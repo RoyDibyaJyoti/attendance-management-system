@@ -25,7 +25,25 @@ public class SessionPersistenceAdapter implements SessionRepositoryPort {
 
     @Override
     public Session save(Session session, UUID academicPeriodId) {
-        SessionEntity entity = mapper.toEntity(session, academicPeriodId);
+        Optional<SessionEntity> existing = repository.findById(session.id());
+        SessionEntity entity;
+        if (existing.isPresent()) {
+            entity = existing.get();
+            entity.setSubjectId(session.subjectId());
+            entity.setSectionId(session.sectionId());
+            entity.setConductedByFacultyId(session.conductedByFacultyId());
+            entity.setAcademicPeriodId(academicPeriodId);
+            entity.setSessionDate(session.sessionDate());
+            entity.setSessionType(session.sessionType().name());
+            entity.setPlannedUnits(session.plannedUnits());
+            entity.setConductedUnits(session.conductedUnits());
+            entity.setStatus(session.status().name());
+            entity.setLabGroupId(session.labGroupId().orElse(null));
+            entity.setReplacedBySessionId(session.replacedBySessionId().orElse(null));
+            entity.setUpdatedAt(java.time.Instant.now());
+        } else {
+            entity = mapper.toEntity(session, academicPeriodId);
+        }
         SessionEntity saved = repository.save(entity);
         return mapper.toDomain(saved);
     }

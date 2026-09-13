@@ -43,10 +43,8 @@ EXPOSE 8080
 HEALTHCHECK --interval=15s --timeout=5s --start-period=25s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
-# Production JVM flags for low memory footprint and container awareness
-ENTRYPOINT ["java", \
-    "-XX:+UseG1GC", \
-    "-XX:MaxRAMPercentage=75.0", \
-    "-Djava.security.egd=file:/dev/./urandom", \
-    "-Dspring.profiles.active=prod", \
-    "-jar", "/app/app.jar"]
+# Default production profile (can be overridden by environment variable)
+ENV SPRING_PROFILES_ACTIVE=prod
+
+# Production JVM flags for low memory footprint, container awareness, and graceful shutdown (PID 1)
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -XX:+UseG1GC -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom -jar /app/app.jar"]

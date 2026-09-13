@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -74,6 +75,12 @@ public class AcademicStructureController {
     @Operation(summary = "List sections for an academic period")
     public ResponseEntity<List<SectionResponse>> listSections(@RequestParam UUID periodId) {
         return ResponseEntity.ok(academicService.listSectionsByPeriod(periodId));
+    }
+
+    @GetMapping("/sections/{sectionId}")
+    @Operation(summary = "Get section by ID")
+    public ResponseEntity<SectionResponse> getSection(@PathVariable UUID sectionId) {
+        return ResponseEntity.ok(academicService.getSection(sectionId));
     }
 
     // Subjects

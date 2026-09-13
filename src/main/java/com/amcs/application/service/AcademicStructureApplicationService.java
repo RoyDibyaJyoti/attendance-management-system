@@ -120,6 +120,12 @@ public class AcademicStructureApplicationService {
             .toList();
     }
 
+    public SectionResponse getSection(UUID sectionId) {
+        SectionEntity entity = sectionPort.findById(sectionId)
+            .orElseThrow(() -> new ResourceNotFoundException("Section not found: " + sectionId));
+        return new SectionResponse(entity.getId(), entity.getName(), entity.getDepartmentId(), entity.getAcademicPeriodId());
+    }
+
     // Subjects
     @Transactional
     public SubjectResponse createSubject(CreateSubjectRequest request) {

@@ -135,4 +135,20 @@ public class EnrollmentApplicationService {
             ))
             .toList();
     }
+
+    public List<EnrollmentResponse> getSectionEnrollments(UUID sectionId) {
+        if (authorizationService != null) {
+            authorizationService.requireFacultyOrAdmin("view section enrollments");
+        }
+        return enrollmentPort.findBySection(sectionId).stream()
+            .map(e -> new EnrollmentResponse(
+                UUID.randomUUID(),
+                e.studentId(),
+                e.sectionId(),
+                e.enrollmentStart(),
+                e.enrollmentEnd().orElse(null),
+                e.enrollmentEnd().isEmpty() ? "ACTIVE" : "ENDED"
+            ))
+            .toList();
+    }
 }

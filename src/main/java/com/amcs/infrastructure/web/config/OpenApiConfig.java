@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
+    private static final String SECURITY_SCHEME_NAME = "BearerAuth";
+
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
@@ -32,6 +34,14 @@ public class OpenApiConfig {
                 .contact(new Contact()
                     .name("AMCS Architecture Team")
                     .email("architecture@amcs.university.edu"))
-                .license(new License().name("Proprietary").url("https://amcs.university.edu/terms")));
+                .license(new License().name("Proprietary").url("https://amcs.university.edu/terms")))
+            .addSecurityItem(new io.swagger.v3.oas.models.security.SecurityRequirement().addList(SECURITY_SCHEME_NAME))
+            .components(new io.swagger.v3.oas.models.Components()
+                .addSecuritySchemes(SECURITY_SCHEME_NAME, new io.swagger.v3.oas.models.security.SecurityScheme()
+                    .name(SECURITY_SCHEME_NAME)
+                    .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
+                    .scheme("bearer")
+                    .bearerFormat("JWT")
+                    .description("Enter your AMCS JWT Bearer token")));
     }
 }

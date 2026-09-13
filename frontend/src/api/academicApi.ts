@@ -41,6 +41,10 @@ export const academicApi = {
     });
   },
 
+  getSectionById: (sectionId: string): Promise<SectionResponse> => {
+    return apiClient<SectionResponse>(`/academic/sections/${sectionId}`);
+  },
+
   // Convenience: get sections across all periods
   getAllSections: async (): Promise<SectionResponse[]> => {
     const periods = await apiClient<AcademicPeriodResponse[]>('/academic/periods');

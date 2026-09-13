@@ -48,4 +48,10 @@ public class EnrollmentController {
     public ResponseEntity<List<EnrollmentResponse>> getStudentEnrollments(@PathVariable UUID studentId) {
         return ResponseEntity.ok(enrollmentService.getStudentEnrollmentHistory(studentId));
     }
+
+    @GetMapping("/sections/{sectionId}")
+    @Operation(summary = "Get enrollments for a section")
+    public ResponseEntity<List<EnrollmentResponse>> getSectionEnrollments(@PathVariable UUID sectionId) {
+        return ResponseEntity.ok(enrollmentService.getSectionEnrollments(sectionId));
+    }
 }

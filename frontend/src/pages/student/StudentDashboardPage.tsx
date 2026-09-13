@@ -64,22 +64,9 @@ export const StudentDashboardPage: React.FC = () => {
       const secId = activeEnrollment.sectionId;
       setSectionId(secId);
 
-      // 2. Get section to find its academicPeriodId
-      const allPeriods = await academicApi.getPeriods();
-      let perId: string | null = null;
-      for (const period of allPeriods) {
-        const sections = await academicApi.getSectionsByPeriod(period.id);
-        const found = sections.find((s) => s.id === secId);
-        if (found) {
-          perId = found.academicPeriodId;
-          break;
-        }
-      }
-
-      if (!perId) {
-        // Fallback: use first period
-        perId = allPeriods[0]?.id ?? null;
-      }
+      // 2. Get section directly to find its academicPeriodId
+      const section = await academicApi.getSectionById(secId);
+      const perId = section.academicPeriodId;
 
       if (!perId) {
         throw new Error('No academic period found for enrollment.');
