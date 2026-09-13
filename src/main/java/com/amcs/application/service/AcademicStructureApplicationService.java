@@ -19,6 +19,7 @@ import com.amcs.application.port.out.SubjectRepositoryPort;
 import com.amcs.domain.academic.AcademicPeriod;
 import com.amcs.domain.academic.CourseType;
 import com.amcs.domain.academic.Subject;
+import com.amcs.infrastructure.persistence.entity.AcademicPeriodEntity;
 import com.amcs.infrastructure.persistence.entity.DepartmentEntity;
 import com.amcs.infrastructure.persistence.entity.SectionEntity;
 import org.springframework.stereotype.Service;
@@ -91,8 +92,8 @@ public class AcademicStructureApplicationService {
     }
 
     public List<AcademicPeriodResponse> listAcademicPeriods() {
-        return periodPort.findAll().stream()
-            .map(p -> new AcademicPeriodResponse(UUID.randomUUID(), p.name(), p.startDate(), p.endDate()))
+        return periodPort.findAllWithIds().stream()
+            .map(e -> new AcademicPeriodResponse(e.getId(), e.getName(), e.getStartDate(), e.getEndDate()))
             .toList();
     }
 

@@ -47,4 +47,9 @@ public class AcademicPeriodPersistenceAdapter implements AcademicPeriodRepositor
     public List<AcademicPeriod> findAll() {
         return repository.findAll().stream().map(mapper::toDomain).toList();
     }
+
+    @Override
+    public List<AcademicPeriodEntity> findAllWithIds() {
+        return repository.findAll();
+    }
 }

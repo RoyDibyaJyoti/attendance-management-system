@@ -48,6 +48,8 @@ amcs:
       enabled: ${AMCS_RATE_LIMIT_ENABLED:true}
       auth-limit-per-minute: 10
       heavy-limit-per-minute: 25
+    bootstrap:
+      enabled: ${AMCS_BOOTSTRAP_ENABLED:true}
 
 management:
   endpoints:

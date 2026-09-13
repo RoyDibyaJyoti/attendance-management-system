@@ -21,3 +21,7 @@ logging:
     org.flywaydb: INFO
     org.hibernate.SQL: INFO
     com.amcs: DEBUG
+
+amcs:
+  bootstrap:
+    enabled: false
