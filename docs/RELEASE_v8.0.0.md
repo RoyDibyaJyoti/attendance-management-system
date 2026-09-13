@@ -89,12 +89,12 @@ All verification suites executed and verified 100% passing:
 
 - **Prerequisites:** Docker 24+ and Docker Compose v2+.
 - **Configuration:** Copy `.env.example` to `.env` and provide strong passwords, 32+ byte HMAC-SHA256 JWT secret, and CORS allowed domain.
-- **Runbook Documentation:** Complete operational checklists, deployment steps, and disaster recovery procedures are available in [PRODUCTION_DEPLOYMENT.md](file:///Users/roy/Documents/coding/fun/attendance/PRODUCTION_DEPLOYMENT.md).
+- **Runbook Documentation:** Complete operational checklists, deployment steps, and disaster recovery procedures are available in [PRODUCTION_DEPLOYMENT.md](../PRODUCTION_DEPLOYMENT.md).
 
 ---
 
 ## 7. Operational Limitations & Roadmap
 
-- **TLS Certificate Termination:** The default reverse proxy runs HTTP on port 80. For internet-facing environments, SSL certificates must be mounted using [`frontend/nginx.ssl.conf.template`](file:///Users/roy/Documents/coding/fun/attendance/frontend/nginx.ssl.conf.template) or terminated via a cloud load balancer.
+- **TLS Certificate Termination:** The default reverse proxy runs HTTP on port 80. For internet-facing environments, SSL certificates must be mounted using [`frontend/nginx.ssl.conf.template`](../frontend/nginx.ssl.conf.template) or terminated via a cloud load balancer.
 - **Single-Node Rate Limiter:** The in-memory Bucket4j rate limiter is optimized for single-instance deployments. For multi-node horizontal scaling, Redis or API gateway rate limiting should be introduced.
 - **Backup Automation:** PostgreSQL database persistence is backed by named volume `amcs_pgdata`. Automated off-site backups via `pg_dump` cron jobs must be managed operationally.

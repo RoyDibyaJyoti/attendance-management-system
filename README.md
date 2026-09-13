@@ -248,7 +248,7 @@ docker compose -f docker-compose.prod.yml ps
 curl -I http://localhost/actuator/health
 ```
 
-For zero-downtime deployment workflows, rolling updates, pre-flight checklists, and disaster recovery procedures, see [PRODUCTION_DEPLOYMENT.md](file:///Users/roy/Documents/coding/fun/attendance/PRODUCTION_DEPLOYMENT.md).
+For zero-downtime deployment workflows, rolling updates, pre-flight checklists, and disaster recovery procedures, see [PRODUCTION_DEPLOYMENT.md](PRODUCTION_DEPLOYMENT.md).
 
 ---
 
@@ -261,7 +261,7 @@ AMCS maintains 100% automated test pass rates across all test suites:
 | **Backend Tests** | Domain unit tests, calculation invariants, mathematical bounds, service mocks, repository queries, Spring Security, JWT authentication, and REST controller integration. | `mvn clean test` | **567 / 567 passed** (0 failures, 0 errors) |
 | **Frontend Tests** | Vitest unit and integration tests for auth state, navigation, API clients, and error boundaries. | `cd frontend && npm test -- --run` | **8 / 8 passed** (0 failures, 0 errors) |
 | **Frontend Linter** | ESLint static analysis checking syntax, imports, and component conventions. | `cd frontend && npm run lint` | **0 errors** (58 warnings) |
-| **Production Build** | TypeScript strict compilation and Vite production asset bundler. | `cd frontend && npm run build` | **Clean build** (469ms) |
+| **Production Build** | TypeScript strict compilation and Vite production asset bundler. | `cd frontend && npm run build` | **Clean build** (481ms) |
 | **Production Smoke** | End-to-end containerized verification of health probes, multi-role auth, HOD setup, Faculty roll-call, Student calculations, Excel binary downloads, and PostgreSQL database row persistence. | `python3 verify_production_stack.py` | **100% passed** |
 
 ---
@@ -282,7 +282,7 @@ AMCS maintains 100% automated test pass rates across all test suites:
 ## 13. Known Limitations & Operational Considerations
 
 1. **TLS / SSL Certificate Termination:**
-   - The production Compose setup provides a hardened HTTP reverse proxy. In production internet environments, TLS must be terminated by mounting genuine certificates into Nginx (using [`frontend/nginx.ssl.conf.template`](file:///Users/roy/Documents/coding/fun/attendance/frontend/nginx.ssl.conf.template)) or via a cloud load balancer (AWS ALB, Cloudflare).
+   - The production Compose setup provides a hardened HTTP reverse proxy. In production internet environments, TLS must be terminated by mounting genuine certificates into Nginx (using [`frontend/nginx.ssl.conf.template`](frontend/nginx.ssl.conf.template)) or via a cloud load balancer (AWS ALB, Cloudflare).
 2. **Single-Instance Rate Limiting:**
    - The built-in token-bucket rate limiter stores state in JVM memory (`ConcurrentHashMap`), which is optimal for a single backend instance. For horizontal scaling across multiple container replicas, rate limiting should be delegated to Redis or enforced at the reverse proxy / API gateway edge.
 3. **Database Backup Strategy:**
@@ -292,9 +292,9 @@ AMCS maintains 100% automated test pass rates across all test suites:
 
 ## 14. Additional Documentation
 
-* [**Architecture Guide**](file:///Users/roy/Documents/coding/fun/attendance/docs/ARCHITECTURE.md) — Deep-dive into hexagonal architecture, calculation pipelines, concurrency, and security.
-* [**Technical Interview Guide**](file:///Users/roy/Documents/coding/fun/attendance/docs/INTERVIEW_GUIDE.md) — 35+ project-specific backend interview Q&As with code references.
-* [**Live Demo Script**](file:///Users/roy/Documents/coding/fun/attendance/docs/DEMO_SCRIPT.md) — 5–7 minute walkthrough script for presentations and technical showcases.
-* [**Resume & Portfolio Bullets**](file:///Users/roy/Documents/coding/fun/attendance/docs/RESUME_BULLETS.md) — Ready-to-use bullet points tailored for Java Backend, Full-Stack, and System Design profiles.
-* [**Production Deployment Guide**](file:///Users/roy/Documents/coding/fun/attendance/PRODUCTION_DEPLOYMENT.md) — Complete operational deployment and disaster recovery runbook.
-* [**Release Notes v8.0.0**](file:///Users/roy/Documents/coding/fun/attendance/docs/RELEASE_v8.0.0.md) — Official v8.0.0 release log.
+* [**Architecture Guide**](docs/ARCHITECTURE.md) — Deep-dive into hexagonal architecture, calculation pipelines, concurrency, and security.
+* [**Technical Interview Guide**](docs/INTERVIEW_GUIDE.md) — 25+ project-specific backend interview Q&As with code references.
+* [**Live Demo Script**](docs/DEMO_SCRIPT.md) — 5–7 minute walkthrough script for presentations and technical showcases.
+* [**Resume & Portfolio Bullets**](docs/RESUME_BULLETS.md) — Ready-to-use bullet points tailored for Java Backend, Full-Stack, and System Design profiles.
+* [**Production Deployment Guide**](PRODUCTION_DEPLOYMENT.md) — Complete operational deployment and disaster recovery runbook.
+* [**Release Notes v8.0.0**](docs/RELEASE_v8.0.0.md) — Official v8.0.0 release log.
