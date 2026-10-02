@@ -1,0 +1,2 @@
+-- V1: empty baseline migration
+-- The first real schema migration will be V2, added when the first feature is built.

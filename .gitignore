@@ -1,26 +1,23 @@
-# Environment / secrets
-.env
-.env.*
-!.env.example
-
-# Java / Maven
+# Compiled output
 target/
 *.class
 
+# Environment
+.env
+.env.local
+.env.production
+
 # IDE
 .idea/
+.settings/
+.classpath
+.project
 *.iml
 
-# VS Code local settings
-.vscode/
+# Frontend
+frontend/node_modules/
+frontend/dist/
 
 # OS
 .DS_Store
-
-# Logs
-*.log
-
-# Temporary test/debug outputs
-check.txt
-*.tmp
-
+Thumbs.db

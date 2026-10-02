@@ -1,22 +1,10 @@
-import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { ToastProvider } from './context/ToastContext';
-import { AppRoutes } from './routes/AppRoutes';
-import { ErrorBoundary } from './components/common/ErrorBoundary';
-
-export function App() {
+function App() {
   return (
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <ToastProvider>
-        <AuthProvider>
-          <ErrorBoundary>
-            <AppRoutes />
-          </ErrorBoundary>
-        </AuthProvider>
-      </ToastProvider>
-    </BrowserRouter>
-  );
+    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+      <h1>AMCS — Clean Start</h1>
+      <p>Ready to build.</p>
+    </div>
+  )
 }
 
-export default App;
+export default App
