@@ -92,9 +92,14 @@ export const FacultyRollCallPage: React.FC = () => {
           const studentMap = new Map(allStudents.map((s) => [s.id, s]));
           const activeEnrollments = sectionEnrollments.filter((e) => e.status === 'ACTIVE');
 
-          const enrolledStudents = activeEnrollments
-            .map((e) => studentMap.get(e.studentId))
-            .filter((s): s is StudentResponse => !!s);
+          const enrolledStudentsMap = new Map<string, StudentResponse>();
+          activeEnrollments.forEach(e => {
+            const s = studentMap.get(e.studentId);
+            if (s) {
+              enrolledStudentsMap.set(s.id, s);
+            }
+          });
+          const enrolledStudents = Array.from(enrolledStudentsMap.values());
 
           // If no section-specific enrollments found, fallback to all students
           const studentList = enrolledStudents.length > 0 ? enrolledStudents : allStudents;

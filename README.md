@@ -248,7 +248,7 @@ docker compose -f docker-compose.prod.yml ps
 curl -I http://localhost/actuator/health
 ```
 
-For zero-downtime deployment workflows, rolling updates, pre-flight checklists, and disaster recovery procedures, see [PRODUCTION_DEPLOYMENT.md](PRODUCTION_DEPLOYMENT.md).
+For zero-downtime deployment workflows, rolling updates, pre-flight checklists, and disaster recovery procedures, see [PRODUCTION_DEPLOYMENT.md](docs/development/PRODUCTION_DEPLOYMENT.md).
 
 ---
 
@@ -292,9 +292,9 @@ AMCS maintains 100% automated test pass rates across all test suites:
 
 ## 14. Additional Documentation
 
-* [**Architecture Guide**](docs/ARCHITECTURE.md) — Deep-dive into hexagonal architecture, calculation pipelines, concurrency, and security.
+* [**Architecture Guide**](docs/architecture/ARCHITECTURE.md) — Deep-dive into hexagonal architecture, calculation pipelines, concurrency, and security.
 * [**Technical Interview Guide**](docs/INTERVIEW_GUIDE.md) — 25+ project-specific backend interview Q&As with code references.
 * [**Live Demo Script**](docs/DEMO_SCRIPT.md) — 5–7 minute walkthrough script for presentations and technical showcases.
 * [**Resume & Portfolio Bullets**](docs/RESUME_BULLETS.md) — Ready-to-use bullet points tailored for Java Backend, Full-Stack, and System Design profiles.
-* [**Production Deployment Guide**](PRODUCTION_DEPLOYMENT.md) — Complete operational deployment and disaster recovery runbook.
+* [**Production Deployment Guide**](docs/development/PRODUCTION_DEPLOYMENT.md) — Complete operational deployment and disaster recovery runbook.
 * [**Release Notes v8.0.0**](docs/RELEASE_v8.0.0.md) — Official v8.0.0 release log.

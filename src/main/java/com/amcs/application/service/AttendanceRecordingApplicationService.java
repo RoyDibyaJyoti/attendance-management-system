@@ -168,7 +168,10 @@ public class AttendanceRecordingApplicationService {
             session.plannedUnits(),
             SessionStatus.CONDUCTED,
             session.labGroupId(),
-            session.replacedBySessionId()
+            session.replacedBySessionId(),
+            session.timetableEntryId(),
+            session.startTime(),
+            session.endTime()
         );
 
         for (int i = 0; i < enrollments.size(); i++) {

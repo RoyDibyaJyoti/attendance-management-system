@@ -25,7 +25,10 @@ public class SessionPersistenceMapper {
             entity.getConductedUnits(),
             SessionStatus.valueOf(entity.getStatus()),
             Optional.ofNullable(entity.getLabGroupId()),
-            Optional.ofNullable(entity.getReplacedBySessionId())
+            Optional.ofNullable(entity.getReplacedBySessionId()),
+            Optional.ofNullable(entity.getTimetableEntryId()),
+            Optional.ofNullable(entity.getStartTime()),
+            Optional.ofNullable(entity.getEndTime())
         );
     }
 
@@ -43,7 +46,10 @@ public class SessionPersistenceMapper {
             domain.conductedUnits(),
             domain.status().name(),
             domain.labGroupId().orElse(null),
-            domain.replacedBySessionId().orElse(null)
+            domain.replacedBySessionId().orElse(null),
+            domain.timetableEntryId().orElse(null),
+            domain.startTime().orElse(null),
+            domain.endTime().orElse(null)
         );
     }
 }

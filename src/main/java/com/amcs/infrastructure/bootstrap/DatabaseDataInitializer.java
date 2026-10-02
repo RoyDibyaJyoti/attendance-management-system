@@ -244,21 +244,21 @@ public class DatabaseDataInitializer implements ApplicationRunner {
 
         // Session 1: Conducted
         UUID s1Id = UUID.randomUUID();
-        Session session1 = new Session(s1Id, theorySubId, sectionId, facultyId, past1, SessionType.THEORY, 1, 1, SessionStatus.CONDUCTED, Optional.empty(), Optional.empty());
+        Session session1 = new Session(s1Id, theorySubId, sectionId, facultyId, past1, SessionType.THEORY, 1, 1, SessionStatus.CONDUCTED, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
         sessionPort.save(session1, periodId);
         attendanceRecordPort.save(new AttendanceRecord(UUID.randomUUID(), s1Id, student1Id, AttendanceStatus.PRESENT));
         attendanceRecordPort.save(new AttendanceRecord(UUID.randomUUID(), s1Id, student2Id, AttendanceStatus.ABSENT));
 
         // Session 2: Conducted
         UUID s2Id = UUID.randomUUID();
-        Session session2 = new Session(s2Id, theorySubId, sectionId, facultyId, past2, SessionType.THEORY, 1, 1, SessionStatus.CONDUCTED, Optional.empty(), Optional.empty());
+        Session session2 = new Session(s2Id, theorySubId, sectionId, facultyId, past2, SessionType.THEORY, 1, 1, SessionStatus.CONDUCTED, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
         sessionPort.save(session2, periodId);
         attendanceRecordPort.save(new AttendanceRecord(UUID.randomUUID(), s2Id, student1Id, AttendanceStatus.PRESENT));
         attendanceRecordPort.save(new AttendanceRecord(UUID.randomUUID(), s2Id, student2Id, AttendanceStatus.PRESENT));
 
         // Session 3: Scheduled today for immediate roll-call testing
         UUID s3Id = UUID.randomUUID();
-        Session session3 = new Session(s3Id, theorySubId, sectionId, facultyId, today, SessionType.THEORY, 1, 0, SessionStatus.SCHEDULED, Optional.empty(), Optional.empty());
+        Session session3 = new Session(s3Id, theorySubId, sectionId, facultyId, today, SessionType.THEORY, 1, 0, SessionStatus.SCHEDULED, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
         sessionPort.save(session3, periodId);
 
         log.info("AMCS university bootstrap completed successfully!");

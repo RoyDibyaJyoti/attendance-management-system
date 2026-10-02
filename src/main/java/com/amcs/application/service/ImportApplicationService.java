@@ -337,6 +337,9 @@ public class ImportApplicationService {
                             0,
                             com.amcs.domain.attendance.SessionStatus.SCHEDULED,
                             java.util.Optional.ofNullable(payload.labGroupId()),
+                            java.util.Optional.empty(),
+                            java.util.Optional.empty(),
+                            java.util.Optional.empty(),
                             java.util.Optional.empty()
                         );
                         sessionRepository.save(session, payload.academicPeriodId());

@@ -89,7 +89,7 @@ All verification suites executed and verified 100% passing:
 
 - **Prerequisites:** Docker 24+ and Docker Compose v2+.
 - **Configuration:** Copy `.env.example` to `.env` and provide strong passwords, 32+ byte HMAC-SHA256 JWT secret, and CORS allowed domain.
-- **Runbook Documentation:** Complete operational checklists, deployment steps, and disaster recovery procedures are available in [PRODUCTION_DEPLOYMENT.md](../PRODUCTION_DEPLOYMENT.md).
+- **Runbook Documentation:** Complete operational checklists, deployment steps, and disaster recovery procedures are available in [PRODUCTION_DEPLOYMENT.md](development/PRODUCTION_DEPLOYMENT.md).
 
 ---
 

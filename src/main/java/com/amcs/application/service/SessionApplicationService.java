@@ -113,7 +113,10 @@ public class SessionApplicationService {
             0, // Cancelled session strictly has 0 conducted units
             SessionStatus.CANCELLED,
             existing.labGroupId(),
-            existing.replacedBySessionId()
+            existing.replacedBySessionId(),
+            existing.timetableEntryId(),
+            existing.startTime(),
+            existing.endTime()
         );
 
         // Fetch academic period ID (from subject/section)
@@ -148,7 +151,10 @@ public class SessionApplicationService {
             0,
             SessionStatus.SCHEDULED,
             existing.labGroupId(),
-            Optional.empty()
+            Optional.empty(),
+            existing.timetableEntryId(),
+            existing.startTime(),
+            existing.endTime()
         );
         sessionPort.save(replacement, UUID.randomUUID());
 
@@ -164,7 +170,10 @@ public class SessionApplicationService {
             0,
             SessionStatus.RESCHEDULED,
             existing.labGroupId(),
-            Optional.of(replacementId)
+            Optional.of(replacementId),
+            existing.timetableEntryId(),
+            existing.startTime(),
+            existing.endTime()
         );
 
         Session saved = sessionPort.save(rescheduled, UUID.randomUUID());

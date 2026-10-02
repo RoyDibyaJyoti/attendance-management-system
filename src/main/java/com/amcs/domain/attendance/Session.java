@@ -36,7 +36,10 @@ public record Session(
     int conductedUnits,
     SessionStatus status,
     Optional<UUID> labGroupId,
-    Optional<UUID> replacedBySessionId
+    Optional<UUID> replacedBySessionId,
+    Optional<UUID> timetableEntryId,
+    Optional<java.time.LocalTime> startTime,
+    Optional<java.time.LocalTime> endTime
 ) {
     public Session {
         Objects.requireNonNull(id, "id must not be null");
@@ -48,6 +51,9 @@ public record Session(
         Objects.requireNonNull(status, "status must not be null");
         Objects.requireNonNull(labGroupId, "labGroupId must not be null");
         Objects.requireNonNull(replacedBySessionId, "replacedBySessionId must not be null");
+        Objects.requireNonNull(timetableEntryId, "timetableEntryId must not be null");
+        Objects.requireNonNull(startTime, "startTime must not be null");
+        Objects.requireNonNull(endTime, "endTime must not be null");
 
         if (plannedUnits < 1) {
             throw new IllegalArgumentException(
@@ -88,7 +94,28 @@ public record Session(
         this(id, subjectId, sectionId, conductedByFacultyId, sessionDate, sessionType,
             units,
             status == SessionStatus.CONDUCTED ? units : 0,
-            status, labGroupId, replacedBySessionId);
+            status, labGroupId, replacedBySessionId, Optional.empty(), Optional.empty(), Optional.empty());
+    }
+
+    /**
+     * Backward-compatible 11-arg constructor.
+     */
+    public Session(
+        UUID id,
+        UUID subjectId,
+        UUID sectionId,
+        UUID conductedByFacultyId,
+        LocalDate sessionDate,
+        SessionType sessionType,
+        int plannedUnits,
+        int conductedUnits,
+        SessionStatus status,
+        Optional<UUID> labGroupId,
+        Optional<UUID> replacedBySessionId
+    ) {
+        this(id, subjectId, sectionId, conductedByFacultyId, sessionDate, sessionType,
+            plannedUnits, conductedUnits,
+            status, labGroupId, replacedBySessionId, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     /**

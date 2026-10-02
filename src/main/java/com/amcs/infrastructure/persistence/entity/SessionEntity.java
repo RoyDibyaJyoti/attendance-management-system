@@ -49,6 +49,15 @@ public class SessionEntity {
     @Column(name = "replaced_by_session_id")
     private UUID replacedBySessionId;
 
+    @Column(name = "timetable_entry_id")
+    private UUID timetableEntryId;
+
+    @Column(name = "start_time")
+    private java.time.LocalTime startTime;
+
+    @Column(name = "end_time")
+    private java.time.LocalTime endTime;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt = Instant.now();
 
@@ -61,10 +70,22 @@ public class SessionEntity {
 
     public SessionEntity() {}
 
+    /**
+     * Backward-compatible constructor for tests.
+     */
     public SessionEntity(
         UUID id, UUID subjectId, UUID sectionId, UUID conductedByFacultyId, UUID academicPeriodId,
         LocalDate sessionDate, String sessionType, int plannedUnits, int conductedUnits, String status,
         UUID labGroupId, UUID replacedBySessionId
+    ) {
+        this(id, subjectId, sectionId, conductedByFacultyId, academicPeriodId, sessionDate, sessionType,
+             plannedUnits, conductedUnits, status, labGroupId, replacedBySessionId, null, null, null);
+    }
+
+    public SessionEntity(
+        UUID id, UUID subjectId, UUID sectionId, UUID conductedByFacultyId, UUID academicPeriodId,
+        LocalDate sessionDate, String sessionType, int plannedUnits, int conductedUnits, String status,
+        UUID labGroupId, UUID replacedBySessionId, UUID timetableEntryId, java.time.LocalTime startTime, java.time.LocalTime endTime
     ) {
         this.id = id;
         this.subjectId = subjectId;
@@ -78,6 +99,9 @@ public class SessionEntity {
         this.status = status;
         this.labGroupId = labGroupId;
         this.replacedBySessionId = replacedBySessionId;
+        this.timetableEntryId = timetableEntryId;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
     }
@@ -112,4 +136,10 @@ public class SessionEntity {
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
     public Integer getVersion() { return version; }
     public void setVersion(Integer version) { this.version = version; }
+    public UUID getTimetableEntryId() { return timetableEntryId; }
+    public void setTimetableEntryId(UUID timetableEntryId) { this.timetableEntryId = timetableEntryId; }
+    public java.time.LocalTime getStartTime() { return startTime; }
+    public void setStartTime(java.time.LocalTime startTime) { this.startTime = startTime; }
+    public java.time.LocalTime getEndTime() { return endTime; }
+    public void setEndTime(java.time.LocalTime endTime) { this.endTime = endTime; }
 }

@@ -24,3 +24,7 @@ target/
 check.txt
 *.tmp
 
+# Eclipse
+.classpath
+.project
+.settings/
